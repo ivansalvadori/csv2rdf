@@ -1,0 +1,38 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix api:  <http://www.public-security-ontology/> .
+ 
+api:numeroOcorrencia a owl:DatatypeProperty .
+api:periodoOcorrencia a owl:DatatypeProperty .
+
+
+api:possuiBoletimOcorrencia a owl:ObjectProperty .
+
+api:localDaOcorrencia a owl:ObjectProperty .
+api:localDaOcorrencia owl:inverseOf api:possuiBoletimOcorrencia .
+
+api:veiculoFurtado a owl:ObjectProperty .
+api:veiculoFurtado owl:inverseOf api:possuiBoletimOcorrencia .
+
+api:BoletimOcorrenciaFurtoVeiculo a owl:Class .
+api:VeiculoFurtado a owl:Class .
+api:LocalDaOcorrencia a owl:Class .
+api:GeoLocalizacao a owl:Class .
+
+api:BO a owl:Class .
+api:BO owl:equivalentClass api:BoletimOcorrenciaFurtoVeiculo .
+
+api:BOnoturno
+  a owl:Class ;
+  owl:equivalentClass
+  [ a owl:Class ;
+    owl:intersectionOf 
+      ( api:BO 
+        [ a owl:Restriction ;
+	      owl:onProperty api:periodoOcorrencia ;
+	      owl:hasValue "A NOITE"
+	    ]
+	   
+	  )	   
+  ] .

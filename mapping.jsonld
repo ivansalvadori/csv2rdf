@@ -1,0 +1,54 @@
+{
+  "@context": {
+    "@type": "http://www.public-security-ontology/BoletimOcorrenciaFurtoVeiculo",
+    "@uriProperty": ["NUMERO_BOLETIM", "DELEGACIA_NOME", "DELEGACIA_CIRCUNSCRICAO"],
+    "NUMERO_BOLETIM": "http://www.public-security-ontology/numeroOcorrencia",
+    "DATAOCORRENCIA": "http://www.public-security-ontology/dataOcorrencia",
+    "PERIDOOCORRENCIA": "http://www.public-security-ontology/periodoOcorrencia",
+    "DELEGACIA_NOME": "http://www.public-security-ontology/nomeDelegacia",
+	"DELEGACIA_CIRCUNSCRICAO": "http://www.public-security-ontology/circunscricaoDelegacia",	
+	"FLAGRANTE": "http://www.public-security-ontology/flagrante",
+	"NUMERO_BOLETIM_PRINCIPAL": "http://www.public-security-ontology/numeroBoletimPrincipal",
+	"SOLUCAO": "http://www.public-security-ontology/solucao",
+	"ESPECIE": "http://www.public-security-ontology/especie",
+	"RUBRICA": "http://www.public-security-ontology/rubrica",
+    "http://www.public-security-ontology/localDaOcorrencia": {
+      "@type": "http://www.public-security-ontology/LocalOcorrencia",
+      "@uriProperty": ["NUMERO_BOLETIM", "LOGRADOURO"],
+      "LOGRADOURO": "http://www.public-security-ontology/logradouro",
+      "NUMERO": "http://www.public-security-ontology/numero",
+      "BAIRRO": "http://www.public-security-ontology/bairro",
+      "CIDADE": "http://www.public-security-ontology/cidade",
+      "UF": "http://www.public-security-ontology/estado",
+      "DESCRICAOLOCAL": "http://www.public-security-ontology/tipoLocal",
+      "http://www.public-security-ontology/geoLocalizacaoDaOcorrencia": {
+        "@type": "http://www.public-security-ontology/GeoLocalizacao",
+        "@uriProperty": "RandomUri",
+        "LATITUDE": "http://www.public-security-ontology/latitude",
+        "LONGITUDE": "http://www.public-security-ontology/longitude"
+      }
+    },
+	"http://www.public-security-ontology/veiculoFurtado": {
+      "@type": "http://www.public-security-ontology/VeiculoFurtado",
+      "@uriProperty": ["NUMERO_BOLETIM", "PLACA_VEICULO"],
+      "PLACA_VEICULO": "http://www.public-security-ontology/placa",
+      "UF_VEICULO": "http://www.public-security-ontology/estado",
+      "CIDADE_VEICULO": "http://www.public-security-ontology/cidade",
+      "DESCR_COR_VEICULO": "http://www.public-security-ontology/cor",
+      "DESCR_MARCA_VEICULO": "http://www.public-security-ontology/marca",
+      "ANO_FABRICACAO": "http://www.public-security-ontology/anoFabricacao",
+      "ANO_MODELO": "http://www.public-security-ontology/anoModelo",
+      "DESCR_TIPO_VEICULO": "http://www.public-security-ontology/tipoVeiculo"
+    }
+  },
+  "@configuration": {
+     "csvSeparator": "TAB",
+     "csvEncode": "UTF-8",
+     "ontologyFile": "ontology.owl",
+     "csvFilesFolder": "data",
+     "prefix": "http://example.com/",
+     "ontologyFormat": "N3",
+     "resourcesPerFile": "1000"     
+   }
+}
+

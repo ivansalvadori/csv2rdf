@@ -1,0 +1,22 @@
+**/target/
+/target/
+*/target/*
+.classpath
+.project
+.settings
+*/tdb/*
+*/rdf-files/*
+*/data/*
+
+data
+tdb
+rdf-files
+
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+*.iml
+*.idea
