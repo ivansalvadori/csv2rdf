@@ -42,13 +42,15 @@
     }
   },
   "@configuration": {
+     "rdfFolder": "output",
      "csvSeparator": "TAB",
      "csvEncode": "UTF-8",
      "ontologyFile": "ontology.owl",
      "csvFilesFolder": "data",
      "prefix": "http://example.com/",
      "ontologyFormat": "N3",
-     "resourcesPerFile": "1000"     
+     "singleRdfOutputFile": false,   
+     "resourcesPerFile": 100     
    }
 }
 

@@ -14,9 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -47,6 +49,7 @@ import com.google.gson.JsonParser;
 
 public class CsvReader {
 
+    private String rdfFolder;
     private String csvFilesFolder;
     private String ontologyFile;
     private String prefix = "";
@@ -57,46 +60,28 @@ public class CsvReader {
     private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
 
     private Model tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-    private int writerBatchController = 0;
+    private int individualsAddedToTempModel = 0;
     private int resourcesPerFile = 0;
-    private int fileConter = 0;
+
+    private boolean writeToFile = true;
+    private boolean singleRdfOutputFile = true;
+
+    private List<CsvReaderListener> listeners = new ArrayList<>();
 
     public CsvReader() {
         JsonObject mappingConfing = createConfigMapping();
+        this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
         this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
         this.ontologyFile = mappingConfing.get("ontologyFile").getAsString();
         this.prefix = mappingConfing.get("prefix").getAsString();
         this.csvEncode = mappingConfing.get("csvEncode").getAsString();
         this.csvSeparator = mappingConfing.get("csvSeparator").getAsString();
         this.ontologyFormat = mappingConfing.get("ontologyFormat").getAsString();
-        this.resourcesPerFile = Integer.parseInt(mappingConfing.get("resourcesPerFile").getAsString());
+        this.resourcesPerFile = mappingConfing.get("resourcesPerFile").getAsInt();
+        this.singleRdfOutputFile = mappingConfing.get("singleRdfOutputFile").getAsBoolean();
 
         OntModel ontologyModel = createOntologyModel();
         this.createMapInverseProperties(ontologyModel);
-    }
-
-    public void setOntologyFormat(String ontologyFormat) {
-        this.ontologyFormat = ontologyFormat;
-    }
-
-    public void setRdfFormat(String rdfFormat) {
-        this.rdfFormat = rdfFormat;
-    }
-
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-
-    public void setCsvEncode(String csvEncode) {
-        this.csvEncode = csvEncode;
-    }
-
-    public void setCsvSeparator(String csvSeparator) {
-        this.csvSeparator = csvSeparator;
-    }
-
-    public void setOntologyFile(String ontologyFile) {
-        this.ontologyFile = ontologyFile;
     }
 
     public void process() {
@@ -119,26 +104,33 @@ public class CsvReader {
                 for (CSVRecord record : records) {
                     JsonObject mappingContext = createContextMapping();
                     Individual resource = createResourceModel(mappingContext, record);
-                    if (writerBatchController > 10000) {
-                        if (this.resourcesPerFile == 0) {
+                    if (this.singleRdfOutputFile) {
+                        if (this.individualsAddedToTempModel == 1000) {
                             writeToFile(this.tempModel);
                             this.tempModel.removeAll();
-                            this.writerBatchController = 0;
+                            this.individualsAddedToTempModel = 0;
                         }
                     }
 
-                    if (this.resourcesPerFile == writerBatchController) {
+                    else if (this.resourcesPerFile == individualsAddedToTempModel) {
                         writeToFile(this.tempModel);
                         this.tempModel.removeAll();
-                        this.writerBatchController = 0;
-                        fileConter++;
+                        this.individualsAddedToTempModel = 0;
                     }
+
                     this.tempModel.add(resource.getModel());
-                    this.writerBatchController++;
-                    // TODO activate a listener
+                    this.individualsAddedToTempModel++;
+                    for (CsvReaderListener listener : this.listeners) {
+                        listener.justRead(resource.getModel());
+                    }
                 }
             }
+
             writeToFile(this.tempModel);
+
+            for (CsvReaderListener listener : this.listeners) {
+                listener.readProcessFinished();
+            }
             System.out.println("Process finished");
 
         } catch (Exception e) {
@@ -218,10 +210,16 @@ public class CsvReader {
     }
 
     private void writeToFile(Model model) {
-        String fileName = "output.ntriples";
-        if (this.fileConter != 0) {
-            fileName = "output" + fileConter + ".ntriples";
+        if (!this.writeToFile) {
+            return;
         }
+
+        File directory = new File(this.rdfFolder);
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
+
+        String fileName = this.rdfFolder + "/output_" + UUID.randomUUID().toString() + ".ntriples";
         write(model, fileName);
     }
 
@@ -285,4 +283,41 @@ public class CsvReader {
         }
         return sha1;
     }
+
+    public void register(CsvReaderListener listener) {
+        this.listeners.add(listener);
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setWriteToFile(boolean writeToFile) {
+        this.writeToFile = writeToFile;
+    }
+
+    public void setOntologyFormat(String ontologyFormat) {
+        this.ontologyFormat = ontologyFormat;
+    }
+
+    public void setRdfFormat(String rdfFormat) {
+        this.rdfFormat = rdfFormat;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public void setCsvEncode(String csvEncode) {
+        this.csvEncode = csvEncode;
+    }
+
+    public void setCsvSeparator(String csvSeparator) {
+        this.csvSeparator = csvSeparator;
+    }
+
+    public void setOntologyFile(String ontologyFile) {
+        this.ontologyFile = ontologyFile;
+    }
+
 }
