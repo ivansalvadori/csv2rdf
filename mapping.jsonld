@@ -49,7 +49,7 @@
      "csvFilesFolder": "data",
      "prefix": "http://example.com/",
      "ontologyFormat": "N3",
-     "singleRdfOutputFile": false,   
+     "singleRdfOutputFile": true,   
      "resourcesPerFile": 100     
    }
 }

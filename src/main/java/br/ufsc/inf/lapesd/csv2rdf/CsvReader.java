@@ -62,6 +62,7 @@ public class CsvReader {
     private Model tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
     private int individualsAddedToTempModel = 0;
     private int resourcesPerFile = 0;
+    private String currentFileId = UUID.randomUUID().toString();
 
     private boolean writeToFile = true;
     private boolean singleRdfOutputFile = true;
@@ -106,14 +107,15 @@ public class CsvReader {
                     Individual resource = createResourceModel(mappingContext, record);
                     if (this.singleRdfOutputFile) {
                         if (this.individualsAddedToTempModel == 1000) {
-                            writeToFile(this.tempModel);
+                            writeToFile(this.tempModel, currentFileId);
                             this.tempModel.removeAll();
                             this.individualsAddedToTempModel = 0;
                         }
                     }
 
                     else if (this.resourcesPerFile == individualsAddedToTempModel) {
-                        writeToFile(this.tempModel);
+                        this.currentFileId = UUID.randomUUID().toString();
+                        writeToFile(this.tempModel, currentFileId);
                         this.tempModel.removeAll();
                         this.individualsAddedToTempModel = 0;
                     }
@@ -126,7 +128,7 @@ public class CsvReader {
                 }
             }
 
-            writeToFile(this.tempModel);
+            writeToFile(this.tempModel, currentFileId);
 
             for (CsvReaderListener listener : this.listeners) {
                 listener.readProcessFinished();
@@ -210,6 +212,17 @@ public class CsvReader {
     }
 
     private void writeToFile(Model model) {
+        String fileId = UUID.randomUUID().toString();
+        String fileName = this.rdfFolder + "/output_" + fileId + ".ntriples";
+        write(model, fileName);
+    }
+
+    private void writeToFile(Model model, String fileId) {
+        String fileName = this.rdfFolder + "/output_" + fileId + ".ntriples";
+        write(model, fileName);
+    }
+
+    private void write(Model model, String fileName) {
         if (!this.writeToFile) {
             return;
         }
@@ -219,11 +232,6 @@ public class CsvReader {
             directory.mkdir();
         }
 
-        String fileName = this.rdfFolder + "/output_" + UUID.randomUUID().toString() + ".ntriples";
-        write(model, fileName);
-    }
-
-    private void write(Model model, String fileName) {
         try (FileWriter fostream = new FileWriter(fileName, true);) {
             BufferedWriter out = new BufferedWriter(fostream);
             model.write(out, this.rdfFormat);
