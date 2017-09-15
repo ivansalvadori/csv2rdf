@@ -59,7 +59,7 @@ public class CsvReader {
     private String rdfFormat = Lang.NTRIPLES.getName();
     private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
 
-    private Model tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+    private Model tempModel;
     private int individualsAddedToTempModel = 0;
     private int resourcesPerFile = 0;
     private String currentFileId = UUID.randomUUID().toString();
@@ -70,6 +70,8 @@ public class CsvReader {
     private List<CsvReaderListener> listeners = new ArrayList<>();
 
     public CsvReader() {
+        this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+
         JsonObject mappingConfing = createConfigMapping();
         this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
         this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
@@ -209,12 +211,6 @@ public class CsvReader {
             }
         }
         return individual;
-    }
-
-    private void writeToFile(Model model) {
-        String fileId = UUID.randomUUID().toString();
-        String fileName = this.rdfFolder + "/output_" + fileId + ".ntriples";
-        write(model, fileName);
     }
 
     private void writeToFile(Model model, String fileId) {
