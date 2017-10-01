@@ -30,6 +30,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ontology.DatatypeProperty;
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.ObjectProperty;
@@ -106,7 +107,12 @@ public class CsvReader {
 
                 for (CSVRecord record : records) {
                     JsonObject mappingContext = createContextMapping();
-                    Individual resource = createResourceModel(mappingContext, record);
+                    Individual resource;
+                    try {
+                        resource = createResourceModel(mappingContext, record);
+                    } catch (UriPropertyNullException e) {
+                        continue;
+                    }
                     if (this.singleRdfOutputFile) {
                         if (this.individualsAddedToTempModel == 1000) {
                             writeToFile(this.tempModel, currentFileId);
@@ -238,16 +244,20 @@ public class CsvReader {
     }
 
     private OntModel createOntologyModel() {
+        JsonObject mappingConfing = this.readConfigMapping();
+        String ontologyFile = mappingConfing.get("ontologyFile").getAsString();
+        String ontologyFormat = mappingConfing.get("ontologyFormat").getAsString();
+
         String ontologyString = null;
         try {
-            ontologyString = new String(Files.readAllBytes(Paths.get(this.ontologyFile)));
+            ontologyString = new String(Files.readAllBytes(Paths.get(ontologyFile)));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        OntModel ontologyModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
-        ontologyModel.read(new StringReader(ontologyString), null, ontologyFormat);
-        return ontologyModel;
+        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
+        model.read(new StringReader(ontologyString), null, ontologyFormat);
+        return model;
     }
 
     private String createResourceUri(JsonObject mappingContext, CSVRecord record, String resourceTypeUri) {
@@ -259,6 +269,9 @@ public class CsvReader {
                 resourceUri = UUID.randomUUID().toString();
             } else {
                 resourceUri = record.get(propertyKey);
+                if (StringUtils.isEmpty(resourceUri)) {
+                    throw new UriPropertyNullException();
+                }
             }
         } else if (mappingContext.get("@uriProperty").isJsonArray()) {
             JsonArray asJsonArray = mappingContext.get("@uriProperty").getAsJsonArray();
@@ -267,23 +280,27 @@ public class CsvReader {
                 JsonElement next = iterator.next();
                 if (next.isJsonPrimitive()) {
                     String propertyKey = next.getAsString();
-                    resourceUri = resourceUri + record.get(propertyKey);
+                    String csvPropertyValue = record.get(propertyKey);
+                    if (StringUtils.isEmpty(csvPropertyValue)) {
+                        throw new UriPropertyNullException();
+                    }
+                    resourceUri = resourceUri + csvPropertyValue;
                 }
             }
         }
 
-        String sha1 = sha1(resourceUri);
+        String sha1 = sha2(resourceUri);
         return this.prefix + sha1;
     }
 
-    private String sha1(String input) {
+    private String sha2(String input) {
         String sha1 = null;
         try {
-            MessageDigest msdDigest = MessageDigest.getInstance("SHA-1");
+            MessageDigest msdDigest = MessageDigest.getInstance("SHA-256");
             msdDigest.update(input.getBytes("UTF-8"), 0, input.length());
             sha1 = DatatypeConverter.printHexBinary(msdDigest.digest());
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            System.out.println("SHA1 error");
+            System.out.println("SHA-256 error");
         }
         return sha1;
     }
@@ -322,6 +339,18 @@ public class CsvReader {
 
     public void setOntologyFile(String ontologyFile) {
         this.ontologyFile = ontologyFile;
+    }
+
+    protected JsonObject readConfigMapping() {
+        try (FileInputStream inputStream = FileUtils.openInputStream(new File("mapping.jsonld"))) {
+            String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
+            JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
+            JsonObject mappingConfing = mappingJsonObject.get("@configuration").getAsJsonObject();
+            return mappingConfing;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Mapping file not found");
+        }
     }
 
 }

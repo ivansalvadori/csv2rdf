@@ -20,3 +20,4 @@ rdf-files
 
 *.iml
 *.idea
+/output/
