@@ -214,6 +214,25 @@ public class CsvReader {
                     }
                     individual.getModel().add(innerResource.getModel());
                 }
+                if (entry.getValue().isJsonArray()) {
+                    JsonArray asJsonArray = entry.getValue().getAsJsonArray();
+                    Iterator<JsonElement> iterator = asJsonArray.iterator();
+                    while (iterator.hasNext()) {
+                        JsonElement next = iterator.next();
+                        if (next.isJsonObject()) {
+                            Individual innerResource = createResourceModel(next.getAsJsonObject(), record);
+                            ObjectProperty property = model.createObjectProperty(entry.getKey());
+
+                            individual.addProperty(property, innerResource);
+
+                            if (mapInverseProperties.get(property.getURI()) != null) {
+                                OntProperty inverseOf = mapInverseProperties.get(property.getURI());
+                                innerResource.addProperty(inverseOf, individual);
+                            }
+                            individual.getModel().add(innerResource.getModel());
+                        }
+                    }
+                }
             }
         }
         return individual;
