@@ -52,17 +52,17 @@ public class CsvReader {
 
     private String rdfFolder;
     private String csvFilesFolder;
-    private String ontologyFile;
     private String prefix = "";
     private String csvEncode = "UTF-8";
     private String csvSeparator = "COMMA";
-    private String ontologyFormat = Lang.N3.getName();
     private String rdfFormat = Lang.NTRIPLES.getName();
     private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
 
     private Model tempModel;
     private int individualsAddedToTempModel = 0;
     private int resourcesPerFile = 0;
+    private int inMemoryModelSize = 10;
+
     private String currentFileId = UUID.randomUUID().toString();
 
     private boolean writeToFile = true;
@@ -76,13 +76,12 @@ public class CsvReader {
         JsonObject mappingConfing = createConfigMapping();
         this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
         this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
-        this.ontologyFile = mappingConfing.get("ontologyFile").getAsString();
         this.prefix = mappingConfing.get("prefix").getAsString();
         this.csvEncode = mappingConfing.get("csvEncode").getAsString();
         this.csvSeparator = mappingConfing.get("csvSeparator").getAsString();
-        this.ontologyFormat = mappingConfing.get("ontologyFormat").getAsString();
         this.resourcesPerFile = mappingConfing.get("resourcesPerFile").getAsInt();
         this.singleRdfOutputFile = mappingConfing.get("singleRdfOutputFile").getAsBoolean();
+        this.inMemoryModelSize = mappingConfing.get("inMemoryModelSize").getAsInt();
 
         OntModel ontologyModel = createOntologyModel();
         this.createMapInverseProperties(ontologyModel);
@@ -108,13 +107,13 @@ public class CsvReader {
                 for (CSVRecord record : records) {
                     JsonObject mappingContext = createContextMapping();
                     Individual resource;
-                    try {
-                        resource = createResourceModel(mappingContext, record);
-                    } catch (UriPropertyNullException e) {
+                    resource = createResourceModel(mappingContext, record);
+                    if (resource == null) {
                         continue;
                     }
+
                     if (this.singleRdfOutputFile) {
-                        if (this.individualsAddedToTempModel == 1000) {
+                        if (this.individualsAddedToTempModel == this.inMemoryModelSize) {
                             writeToFile(this.tempModel, currentFileId);
                             this.tempModel.removeAll();
                             this.individualsAddedToTempModel = 0;
@@ -128,7 +127,7 @@ public class CsvReader {
                         this.individualsAddedToTempModel = 0;
                     }
 
-                    this.tempModel.add(resource.getModel());
+                    this.tempModel.add(resource.listProperties());
                     this.individualsAddedToTempModel++;
                     for (CsvReaderListener listener : this.listeners) {
                         listener.justRead(resource.getModel());
@@ -182,10 +181,16 @@ public class CsvReader {
     private Individual createResourceModel(JsonObject mappingContext, CSVRecord record) {
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
         OntClass resourceClass = model.createClass(mappingContext.get("@type").getAsString());
-        String uri = createResourceUri(mappingContext, record, resourceClass.getURI());
+
+        String uri = null;
+        try {
+            uri = createResourceUri(mappingContext, record, resourceClass.getURI());
+        } catch (UriPropertyNullException e) {
+            return null;
+        }
+
         model.createClass(mappingContext.get("@type").getAsString());
         Individual individual = model.createIndividual(uri, resourceClass);
-
         if (!mappingContext.isJsonNull()) {
             Set<Entry<String, JsonElement>> entrySet = mappingContext.getAsJsonObject().entrySet();
             for (Entry<String, JsonElement> entry : entrySet) {
@@ -204,6 +209,9 @@ public class CsvReader {
                 }
                 if (entry.getValue().isJsonObject()) {
                     Individual innerResource = createResourceModel(entry.getValue().getAsJsonObject(), record);
+                    if (innerResource == null) {
+                        continue;
+                    }
                     ObjectProperty property = model.createObjectProperty(entry.getKey());
 
                     individual.addProperty(property, innerResource);
@@ -221,6 +229,9 @@ public class CsvReader {
                         JsonElement next = iterator.next();
                         if (next.isJsonObject()) {
                             Individual innerResource = createResourceModel(next.getAsJsonObject(), record);
+                            if (innerResource == null) {
+                                continue;
+                            }
                             ObjectProperty property = model.createObjectProperty(entry.getKey());
 
                             individual.addProperty(property, innerResource);
@@ -308,20 +319,20 @@ public class CsvReader {
             }
         }
 
-        String sha1 = sha2(resourceUri);
-        return this.prefix + sha1;
+        String sha2 = sha2(resourceUri);
+        return this.prefix + sha2;
     }
 
     private String sha2(String input) {
-        String sha1 = null;
+        String sha2 = null;
         try {
             MessageDigest msdDigest = MessageDigest.getInstance("SHA-256");
             msdDigest.update(input.getBytes("UTF-8"), 0, input.length());
-            sha1 = DatatypeConverter.printHexBinary(msdDigest.digest());
+            sha2 = DatatypeConverter.printHexBinary(msdDigest.digest());
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
             System.out.println("SHA-256 error");
         }
-        return sha1;
+        return sha2;
     }
 
     public void register(CsvReaderListener listener) {
@@ -334,10 +345,6 @@ public class CsvReader {
 
     public void setWriteToFile(boolean writeToFile) {
         this.writeToFile = writeToFile;
-    }
-
-    public void setOntologyFormat(String ontologyFormat) {
-        this.ontologyFormat = ontologyFormat;
     }
 
     public void setRdfFormat(String rdfFormat) {
@@ -354,10 +361,6 @@ public class CsvReader {
 
     public void setCsvSeparator(String csvSeparator) {
         this.csvSeparator = csvSeparator;
-    }
-
-    public void setOntologyFile(String ontologyFile) {
-        this.ontologyFile = ontologyFile;
     }
 
     protected JsonObject readConfigMapping() {

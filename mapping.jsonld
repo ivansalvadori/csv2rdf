@@ -1,7 +1,7 @@
 {
   "@context": {
     "@type": "http://www.public-security-ontology/BoletimOcorrenciaFurtoVeiculo",
-    "@uriProperty": ["NUMERO_BOLETIM", "DELEGACIA_NOME", "DELEGACIA_CIRCUNSCRICAO"],
+    "@uriProperty": ["NUMERO_BOLETIM"],
     "NUMERO_BOLETIM": "http://www.public-security-ontology/numeroOcorrencia",
     "DATAOCORRENCIA": "http://www.public-security-ontology/dataOcorrencia",
     "PERIDOOCORRENCIA": "http://www.public-security-ontology/periodoOcorrencia",
@@ -46,11 +46,12 @@
      "csvSeparator": "TAB",
      "csvEncode": "UTF-8",
      "ontologyFile": "ontology.owl",
-     "csvFilesFolder": "data",
+     "csvFilesFolder": "C://Users//ivan_//Documents//sddms-experiment//data",
      "prefix": "http://example.com/",
      "ontologyFormat": "N3",
      "singleRdfOutputFile": true,   
-     "resourcesPerFile": 100     
+     "resourcesPerFile": 100,
+     "inMemoryModelSize": 100000    
    }
 }
 
