@@ -72,7 +72,6 @@ public class CsvReader {
 
     public CsvReader() {
         this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-
         JsonObject mappingConfing = createConfigMapping();
         this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
         this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
@@ -127,7 +126,7 @@ public class CsvReader {
                         this.individualsAddedToTempModel = 0;
                     }
 
-                    this.tempModel.add(resource.listProperties());
+                    this.tempModel.add(resource.getModel());
                     this.individualsAddedToTempModel++;
                     for (CsvReaderListener listener : this.listeners) {
                         listener.justRead(resource.getModel());

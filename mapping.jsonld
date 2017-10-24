@@ -46,12 +46,12 @@
      "csvSeparator": "TAB",
      "csvEncode": "UTF-8",
      "ontologyFile": "ontology.owl",
-     "csvFilesFolder": "C://Users//ivan_//Documents//sddms-experiment//data",
+     "csvFilesFolder": "data",
      "prefix": "http://example.com/",
      "ontologyFormat": "N3",
      "singleRdfOutputFile": true,   
      "resourcesPerFile": 100,
-     "inMemoryModelSize": 100000    
+     "inMemoryModelSize": 1    
    }
 }
 
