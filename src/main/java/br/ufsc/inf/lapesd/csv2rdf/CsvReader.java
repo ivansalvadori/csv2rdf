@@ -40,6 +40,8 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
@@ -127,6 +129,8 @@ public class CsvReader {
                         this.individualsAddedToTempModel = 0;
                     }
 
+                    removeTBox(resource);
+
                     this.tempModel.add(resource.getModel());
                     this.individualsAddedToTempModel++;
                     this.totalProcessedRecords++;
@@ -147,6 +151,18 @@ public class CsvReader {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void removeTBox(Individual resource) {
+        List<Statement> toRemove = new ArrayList<>();
+        StmtIterator listStatements = resource.getModel().listStatements();
+        while (listStatements.hasNext()) {
+            Statement next = listStatements.next();
+            if (!next.getSubject().getURI().startsWith(this.prefix)) {
+                toRemove.add(next);
+            }
+        }
+        resource.getModel().remove(toRemove);
     }
 
     private JsonObject createContextMapping() {
