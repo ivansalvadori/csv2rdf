@@ -62,6 +62,7 @@ public class CsvReader {
     private int individualsAddedToTempModel = 0;
     private int resourcesPerFile = 0;
     private int inMemoryModelSize = 10;
+    private int totalProcessedRecords = 0;
 
     private String currentFileId = UUID.randomUUID().toString();
 
@@ -128,6 +129,8 @@ public class CsvReader {
 
                     this.tempModel.add(resource.getModel());
                     this.individualsAddedToTempModel++;
+                    this.totalProcessedRecords++;
+
                     for (CsvReaderListener listener : this.listeners) {
                         listener.justRead(resource.getModel());
                     }
@@ -139,7 +142,7 @@ public class CsvReader {
             for (CsvReaderListener listener : this.listeners) {
                 listener.readProcessFinished();
             }
-            System.out.println("Process finished");
+            System.out.println("Process finished. Record processed: " + totalProcessedRecords);
 
         } catch (Exception e) {
             e.printStackTrace();

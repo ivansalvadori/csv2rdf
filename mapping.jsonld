@@ -30,7 +30,7 @@
     },
 	"http://www.public-security-ontology/veiculoFurtado": {
       "@type": "http://www.public-security-ontology/VeiculoFurtado",
-      "@uriProperty": ["NUMERO_BOLETIM", "PLACA_VEICULO"],
+      "@uriProperty": ["PLACA_VEICULO"],
       "PLACA_VEICULO": "http://www.public-security-ontology/placa",
       "UF_VEICULO": "http://www.public-security-ontology/estado",
       "CIDADE_VEICULO": "http://www.public-security-ontology/cidade",
