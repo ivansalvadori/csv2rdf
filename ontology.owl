@@ -30,9 +30,8 @@ api:BOnoturno
     owl:intersectionOf 
       ( api:BO 
         [ a owl:Restriction ;
-	      owl:onProperty api:periodoOcorrencia ;
+	      owl:onProperty api:timeOfDay ;
 	      owl:hasValue "A NOITE"
 	    ]
-	   
 	  )	   
   ] .

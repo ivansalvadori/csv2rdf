@@ -70,14 +70,29 @@ public class CsvReader {
 
     private boolean writeToFile = true;
     private boolean singleRdfOutputFile = true;
+    private String mappingFile = "mapping.jsonld";
 
     private List<CsvReaderListener> listeners = new ArrayList<>();
 
-    public CsvReader() {
+    public void setRdfFolder(String rdfFolder) {
+        this.rdfFolder = rdfFolder;
+    }
+
+    public void setCsvFilesFolder(String csvFilesFolder) {
+        this.csvFilesFolder = csvFilesFolder;
+    }
+
+    public void process() {
         this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
         JsonObject mappingConfing = createConfigMapping();
-        this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
-        this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
+
+        if (this.rdfFolder == null) {
+            this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
+        }
+
+        if (this.csvFilesFolder == null) {
+            this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
+        }
         this.prefix = mappingConfing.get("prefix").getAsString();
         this.csvEncode = mappingConfing.get("csvEncode").getAsString();
         this.csvSeparator = mappingConfing.get("csvSeparator").getAsString();
@@ -87,9 +102,7 @@ public class CsvReader {
 
         OntModel ontologyModel = createOntologyModel();
         this.createMapInverseProperties(ontologyModel);
-    }
 
-    public void process() {
         try {
             String csvFilesFolder = this.csvFilesFolder;
             Collection<File> files = FileUtils.listFiles(new File(csvFilesFolder), null, true);
@@ -166,7 +179,7 @@ public class CsvReader {
     }
 
     private JsonObject createContextMapping() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File("mapping.jsonld"))) {
+        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
             String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
             JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
             return mappingJsonObject.get("@context").getAsJsonObject();
@@ -176,7 +189,7 @@ public class CsvReader {
     }
 
     private JsonObject createConfigMapping() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File("mapping.jsonld"))) {
+        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
             String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
             JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
             return mappingJsonObject.get("@configuration").getAsJsonObject();
@@ -297,13 +310,13 @@ public class CsvReader {
         String ontologyFormat = mappingConfing.get("ontologyFormat").getAsString();
 
         String ontologyString = null;
+        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
         try {
             ontologyString = new String(Files.readAllBytes(Paths.get(ontologyFile)));
         } catch (IOException e) {
-            e.printStackTrace();
+            return model;
         }
 
-        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
         model.read(new StringReader(ontologyString), null, ontologyFormat);
         return model;
     }
@@ -381,8 +394,12 @@ public class CsvReader {
         this.csvSeparator = csvSeparator;
     }
 
+    public void setMappingFile(String mappingFile) {
+        this.mappingFile = mappingFile;
+    }
+
     protected JsonObject readConfigMapping() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File("mapping.jsonld"))) {
+        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
             String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
             JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
             JsonObject mappingConfing = mappingJsonObject.get("@configuration").getAsJsonObject();
