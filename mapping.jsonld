@@ -1,44 +1,44 @@
 {
   "@context": {
-    "@type": "http://www.public-security-ontology/BoletimOcorrenciaFurtoVeiculo",
+    "@type": "http://www.ssp.sp.gov.br/transparenciassp/BoletimOcorrenciaFurtoVeiculo",
     "@uriProperty": ["NUMERO_BOLETIM"],
-    "NUMERO_BOLETIM": "http://www.public-security-ontology/numeroOcorrencia",
-    "DATAOCORRENCIA": "http://www.public-security-ontology/dataOcorrencia",
-    "PERIDOOCORRENCIA": "http://www.public-security-ontology/periodoOcorrencia",
-    "DELEGACIA_NOME": "http://www.public-security-ontology/nomeDelegacia",
-	"DELEGACIA_CIRCUNSCRICAO": "http://www.public-security-ontology/circunscricaoDelegacia",	
-	"FLAGRANTE": "http://www.public-security-ontology/flagrante",
-	"NUMERO_BOLETIM_PRINCIPAL": "http://www.public-security-ontology/numeroBoletimPrincipal",
-	"SOLUCAO": "http://www.public-security-ontology/solucao",
-	"ESPECIE": "http://www.public-security-ontology/especie",
-	"RUBRICA": "http://www.public-security-ontology/rubrica",
-    "http://www.public-security-ontology/localDaOcorrencia": {
-      "@type": "http://www.public-security-ontology/LocalOcorrencia",
+    "NUMERO_BOLETIM": "http://www.ssp.sp.gov.br/transparenciassp/numeroOcorrencia",
+    "DATAOCORRENCIA": "http://www.ssp.sp.gov.br/transparenciassp/dataOcorrencia",
+    "PERIDOOCORRENCIA": "http://www.ssp.sp.gov.br/transparenciassp/periodoOcorrencia",
+    "DELEGACIA_NOME": "http://www.ssp.sp.gov.br/transparenciassp/nomeDelegacia",
+	"DELEGACIA_CIRCUNSCRICAO": "http://www.ssp.sp.gov.br/transparenciassp/circunscricaoDelegacia",	
+	"FLAGRANTE": "http://www.ssp.sp.gov.br/transparenciassp/flagrante",
+	"NUMERO_BOLETIM_PRINCIPAL": "http://www.ssp.sp.gov.br/transparenciassp/numeroBoletimPrincipal",
+	"SOLUCAO": "http://www.ssp.sp.gov.br/transparenciassp/solucao",
+	"ESPECIE": "http://www.ssp.sp.gov.br/transparenciassp/especie",
+	"RUBRICA": "http://www.ssp.sp.gov.br/transparenciassp/rubrica",
+    "http://www.ssp.sp.gov.br/transparenciassp/localDaOcorrencia": {
+      "@type": "http://www.ssp.sp.gov.br/transparenciassp/LocalOcorrencia",
       "@uriProperty": ["NUMERO_BOLETIM", "LOGRADOURO"],
-      "LOGRADOURO": "http://www.public-security-ontology/logradouro",
-      "NUMERO": "http://www.public-security-ontology/numero",
-      "BAIRRO": "http://www.public-security-ontology/bairro",
-      "CIDADE": "http://www.public-security-ontology/cidade",
-      "UF": "http://www.public-security-ontology/estado",
-      "DESCRICAOLOCAL": "http://www.public-security-ontology/tipoLocal",
-      "http://www.public-security-ontology/geoLocalizacaoDaOcorrencia": {
-        "@type": "http://www.public-security-ontology/GeoLocalizacao",
+      "LOGRADOURO": "http://www.ssp.sp.gov.br/transparenciassp/logradouro",
+      "NUMERO": "http://www.ssp.sp.gov.br/transparenciassp/numero",
+      "BAIRRO": "http://www.ssp.sp.gov.br/transparenciassp/bairro",
+      "CIDADE": "http://www.ssp.sp.gov.br/transparenciassp/cidade",
+      "UF": "http://www.ssp.sp.gov.br/transparenciassp/estado",
+      "DESCRICAOLOCAL": "http://www.ssp.sp.gov.br/transparenciassp/tipoLocal",
+      "http://www.ssp.sp.gov.br/transparenciassp/geoLocalizacaoDaOcorrencia": {
+        "@type": "http://www.ssp.sp.gov.br/transparenciassp/GeoLocalizacao",
         "@uriProperty": "RandomUri",
-        "LATITUDE": "http://www.public-security-ontology/latitude",
-        "LONGITUDE": "http://www.public-security-ontology/longitude"
+        "LATITUDE": "http://www.ssp.sp.gov.br/transparenciassp/latitude",
+        "LONGITUDE": "http://www.ssp.sp.gov.br/transparenciassp/longitude"
       }
     },
-	"http://www.public-security-ontology/veiculoFurtado": {
-      "@type": "http://www.public-security-ontology/VeiculoFurtado",
+	"http://www.ssp.sp.gov.br/transparenciassp/veiculoFurtado": {
+      "@type": "http://www.ssp.sp.gov.br/transparenciassp/VeiculoFurtado",
       "@uriProperty": ["PLACA_VEICULO"],
-      "PLACA_VEICULO": "http://www.public-security-ontology/placa",
-      "UF_VEICULO": "http://www.public-security-ontology/estado",
-      "CIDADE_VEICULO": "http://www.public-security-ontology/cidade",
-      "DESCR_COR_VEICULO": "http://www.public-security-ontology/cor",
-      "DESCR_MARCA_VEICULO": "http://www.public-security-ontology/marca",
-      "ANO_FABRICACAO": "http://www.public-security-ontology/anoFabricacao",
-      "ANO_MODELO": "http://www.public-security-ontology/anoModelo",
-      "DESCR_TIPO_VEICULO": "http://www.public-security-ontology/tipoVeiculo"
+      "PLACA_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/placa",
+      "UF_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/estado",
+      "CIDADE_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/cidade",
+      "DESCR_COR_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/cor",
+      "DESCR_MARCA_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/marca",
+      "ANO_FABRICACAO": "http://www.ssp.sp.gov.br/transparenciassp/anoFabricacao",
+      "ANO_MODELO": "http://www.ssp.sp.gov.br/transparenciassp/anoModelo",
+      "DESCR_TIPO_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/tipoVeiculo"
     }
   },
   "@configuration": {
@@ -47,11 +47,11 @@
      "csvEncode": "UTF-8",
      "ontologyFile": "ontology.owl",
      "csvFilesFolder": "data",
-     "prefix": "http://example.com/",
+     "prefix": "http://www.ssp.sp.gov.br/transparenciassp",
      "ontologyFormat": "N3",
      "singleRdfOutputFile": true,   
      "resourcesPerFile": 100,
-     "inMemoryModelSize": 1    
+     "inMemoryModelSize": 10000    
    }
 }
 

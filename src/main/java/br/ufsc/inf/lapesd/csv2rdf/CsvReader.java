@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -351,7 +353,14 @@ public class CsvReader {
         }
 
         String sha2 = sha2(resourceUri);
-        return this.prefix + sha2;
+        URI uri = null;
+        try {
+            uri = new URI(this.prefix + "/" + sha2);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return uri.toString();
+
     }
 
     private String sha2(String input) {
