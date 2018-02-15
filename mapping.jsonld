@@ -42,16 +42,16 @@
     }
   },
   "@configuration": {
-     "rdfFolder": "output",
-     "csvSeparator": "TAB",
-     "csvEncode": "UTF-8",
-     "ontologyFile": "ontology.owl",
-     "csvFilesFolder": "data",
-     "prefix": "http://www.ssp.sp.gov.br/transparenciassp",
-     "ontologyFormat": "N3",
-     "singleRdfOutputFile": true,   
-     "resourcesPerFile": 100,
-     "inMemoryModelSize": 10000    
-   }
+		 "rdfFolder": "output",
+		 "csvSeparator": "TAB",
+		 "csvEncode": "UTF-8",
+		 "ontologyFile": "ontology.owl",
+		 "csvFilesFolder": "data",
+		 "managedUri": "http://www.ssp.sp.gov.br/transparenciassp",
+		 "ontologyFormat": "N3",
+		 "singleRdfOutputFile": true,   
+		 "resourcesPerFile": 100,
+		 "inMemoryModelSize": 10000    
+	   }
 }
 

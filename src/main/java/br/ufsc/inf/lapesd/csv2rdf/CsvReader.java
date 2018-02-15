@@ -56,7 +56,7 @@ public class CsvReader {
 
     private String rdfFolder;
     private String csvFilesFolder;
-    private String prefix = "";
+    private String managedUri = "";
     private String csvEncode = "UTF-8";
     private String csvSeparator = "COMMA";
     private String rdfFormat = Lang.NTRIPLES.getName();
@@ -95,7 +95,7 @@ public class CsvReader {
         if (this.csvFilesFolder == null) {
             this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
         }
-        this.prefix = mappingConfing.get("prefix").getAsString();
+        this.managedUri = mappingConfing.get("managedUri").getAsString();
         this.csvEncode = mappingConfing.get("csvEncode").getAsString();
         this.csvSeparator = mappingConfing.get("csvSeparator").getAsString();
         this.resourcesPerFile = mappingConfing.get("resourcesPerFile").getAsInt();
@@ -173,7 +173,7 @@ public class CsvReader {
         StmtIterator listStatements = resource.getModel().listStatements();
         while (listStatements.hasNext()) {
             Statement next = listStatements.next();
-            if (!next.getSubject().getURI().startsWith(this.prefix)) {
+            if (!next.getSubject().getURI().startsWith(this.managedUri)) {
                 toRemove.add(next);
             }
         }
@@ -355,7 +355,7 @@ public class CsvReader {
         String sha2 = sha2(resourceUri);
         URI uri = null;
         try {
-            uri = new URI(this.prefix + "/" + sha2);
+            uri = new URI(this.managedUri + "/" + sha2);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -379,20 +379,12 @@ public class CsvReader {
         this.listeners.add(listener);
     }
 
-    public String getPrefix() {
-        return prefix;
-    }
-
     public void setWriteToFile(boolean writeToFile) {
         this.writeToFile = writeToFile;
     }
 
     public void setRdfFormat(String rdfFormat) {
         this.rdfFormat = rdfFormat;
-    }
-
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
     }
 
     public void setCsvEncode(String csvEncode) {
