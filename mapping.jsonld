@@ -1,57 +1,11 @@
 {
   "@context": {
     "@type": "http://www.ssp.sp.gov.br/transparenciassp/BoletimOcorrenciaFurtoVeiculo",
-    "@uriProperty": ["NUMERO_BOLETIM"],
-    "NUMERO_BOLETIM": "http://www.ssp.sp.gov.br/transparenciassp/numeroOcorrencia",
-    "DATAOCORRENCIA": "http://www.ssp.sp.gov.br/transparenciassp/dataOcorrencia",
-    "PERIDOOCORRENCIA": "http://www.ssp.sp.gov.br/transparenciassp/periodoOcorrencia",
-    "DELEGACIA_NOME": "http://www.ssp.sp.gov.br/transparenciassp/nomeDelegacia",
-	"DELEGACIA_CIRCUNSCRICAO": "http://www.ssp.sp.gov.br/transparenciassp/circunscricaoDelegacia",	
-	"FLAGRANTE": "http://www.ssp.sp.gov.br/transparenciassp/flagrante",
-	"NUMERO_BOLETIM_PRINCIPAL": "http://www.ssp.sp.gov.br/transparenciassp/numeroBoletimPrincipal",
-	"SOLUCAO": "http://www.ssp.sp.gov.br/transparenciassp/solucao",
-	"ESPECIE": "http://www.ssp.sp.gov.br/transparenciassp/especie",
-	"RUBRICA": "http://www.ssp.sp.gov.br/transparenciassp/rubrica",
-    "http://www.ssp.sp.gov.br/transparenciassp/localDaOcorrencia": {
-      "@type": "http://www.ssp.sp.gov.br/transparenciassp/LocalOcorrencia",
-      "@uriProperty": ["NUMERO_BOLETIM", "LOGRADOURO"],
-      "LOGRADOURO": "http://www.ssp.sp.gov.br/transparenciassp/logradouro",
-      "NUMERO": "http://www.ssp.sp.gov.br/transparenciassp/numero",
-      "BAIRRO": "http://www.ssp.sp.gov.br/transparenciassp/bairro",
-      "CIDADE": "http://www.ssp.sp.gov.br/transparenciassp/cidade",
-      "UF": "http://www.ssp.sp.gov.br/transparenciassp/estado",
-      "DESCRICAOLOCAL": "http://www.ssp.sp.gov.br/transparenciassp/tipoLocal",
-      "http://www.ssp.sp.gov.br/transparenciassp/geoLocalizacaoDaOcorrencia": {
-        "@type": "http://www.ssp.sp.gov.br/transparenciassp/GeoLocalizacao",
-        "@uriProperty": "RandomUri",
-        "LATITUDE": "http://www.ssp.sp.gov.br/transparenciassp/latitude",
-        "LONGITUDE": "http://www.ssp.sp.gov.br/transparenciassp/longitude"
-      }
-    },
-	"http://www.ssp.sp.gov.br/transparenciassp/veiculoFurtado": {
-      "@type": "http://www.ssp.sp.gov.br/transparenciassp/VeiculoFurtado",
-      "@uriProperty": ["PLACA_VEICULO"],
-      "PLACA_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/placa",
-      "UF_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/estado",
-      "CIDADE_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/cidade",
-      "DESCR_COR_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/cor",
-      "DESCR_MARCA_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/marca",
-      "ANO_FABRICACAO": "http://www.ssp.sp.gov.br/transparenciassp/anoFabricacao",
-      "ANO_MODELO": "http://www.ssp.sp.gov.br/transparenciassp/anoModelo",
-      "DESCR_TIPO_VEICULO": "http://www.ssp.sp.gov.br/transparenciassp/tipoVeiculo"
-    }
-  },
-  "@configuration": {
-		 "rdfFolder": "output",
-		 "csvSeparator": "TAB",
-		 "csvEncode": "UTF-8",
-		 "ontologyFile": "ontology.owl",
-		 "csvFilesFolder": "data",
-		 "managedUri": "http://www.ssp.sp.gov.br/transparenciassp",
-		 "ontologyFormat": "N3",
-		 "singleRdfOutputFile": true,   
-		 "resourcesPerFile": 100,
-		 "inMemoryModelSize": 10000    
-	   }
+    "@uriProperty": ["TitleA"],
+    "TitleA": "http://www.ssp.sp.gov.br/transparenciassp/numeroOcorrencia",
+    "Titlex": "http://www.ssp.sp.gov.br/transparenciassp/dataOcorrencia",
+    "TitleC": "http://www.ssp.sp.gov.br/transparenciassp/periodoOcorrencia",
+    "TitleD": "http://www.ssp.sp.gov.br/transparenciassp/nomeDelegacia"
+  }
 }
 

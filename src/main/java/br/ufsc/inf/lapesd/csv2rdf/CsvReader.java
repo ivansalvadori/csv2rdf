@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.csv.CSVFormat;
@@ -46,61 +47,70 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@Component
 public class CsvReader {
 
-    private String rdfFolder;
-    private String csvFilesFolder;
-    private String managedUri = "";
-    private String csvEncode = "UTF-8";
-    private String csvSeparator = "COMMA";
-    private String rdfFormat = Lang.NTRIPLES.getName();
-    private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
+    @Value("${config.managedUri}")
+    private String managedUri = "http://example.com";
 
+    @Value("${config.rdfFolder}")
+    private String rdfFolder;
+
+    @Value("${config.csvFilesFolder}")
+    private String csvFilesFolder;
+
+    @Value("${config.csvEncode}")
+    private String csvEncode = "UTF-8";
+
+    @Value("${config.csvSeparator}")
+    private String csvSeparator = "COMMA";
+
+    @Value("${config.rdfFormat}")
+    private String rdfFormat = Lang.NTRIPLES.getName();
+
+    @Value("${config.singleRdfOutputFile}")
+    private boolean singleRdfOutputFile = true;
+
+    // ignored if singleRdfOutputFile true
+    @Value("${config.resourcesPerFile}")
+    private int resourcesPerFile = 0;
+
+    @Value("${config.writeToFile}")
+    private boolean writeToFile = true;
+
+    @Value("${config.ontologyFormat}")
+    String ontologyFormat = Lang.NTRIPLES.getName();
+
+    private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
     private Model tempModel;
     private int individualsAddedToTempModel = 0;
-    private int resourcesPerFile = 0;
-    private int inMemoryModelSize = 10;
+    private int inMemoryModelSize = 1000;
     private int totalProcessedRecords = 0;
-
     private String currentFileId = UUID.randomUUID().toString();
-
-    private boolean writeToFile = true;
-    private boolean singleRdfOutputFile = true;
     private String mappingFile = "mapping.jsonld";
-
+    private String ontologyFile = "ontology.owl";
     private List<CsvReaderListener> listeners = new ArrayList<>();
 
-    public void setRdfFolder(String rdfFolder) {
-        this.rdfFolder = rdfFolder;
-    }
+    @Value("${config.processWhenStarted}")
+    private boolean processWhenStarted = false;
 
-    public void setCsvFilesFolder(String csvFilesFolder) {
-        this.csvFilesFolder = csvFilesFolder;
+    @PostConstruct
+    public void init() {
+        if (processWhenStarted) {
+            process();
+        }
     }
 
     public void process() {
         this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-        JsonObject mappingConfing = createConfigMapping();
-
-        if (this.rdfFolder == null) {
-            this.rdfFolder = mappingConfing.get("rdfFolder").getAsString();
-        }
-
-        if (this.csvFilesFolder == null) {
-            this.csvFilesFolder = mappingConfing.get("csvFilesFolder").getAsString();
-        }
-        this.managedUri = mappingConfing.get("managedUri").getAsString();
-        this.csvEncode = mappingConfing.get("csvEncode").getAsString();
-        this.csvSeparator = mappingConfing.get("csvSeparator").getAsString();
-        this.resourcesPerFile = mappingConfing.get("resourcesPerFile").getAsInt();
-        this.singleRdfOutputFile = mappingConfing.get("singleRdfOutputFile").getAsBoolean();
-        this.inMemoryModelSize = mappingConfing.get("inMemoryModelSize").getAsInt();
 
         OntModel ontologyModel = createOntologyModel();
         this.createMapInverseProperties(ontologyModel);
@@ -115,7 +125,7 @@ public class CsvReader {
                 Iterable<CSVRecord> records = null;
 
                 if (csvSeparator.equalsIgnoreCase("COMMA")) {
-                    records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
+                    records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(in);
                 }
                 if (csvSeparator.equalsIgnoreCase("TAB")) {
                     records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
@@ -185,16 +195,6 @@ public class CsvReader {
             String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
             JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
             return mappingJsonObject.get("@context").getAsJsonObject();
-        } catch (IOException e) {
-            throw new RuntimeException("Mapping file not found");
-        }
-    }
-
-    private JsonObject createConfigMapping() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
-            String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-            JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
-            return mappingJsonObject.get("@configuration").getAsJsonObject();
         } catch (IOException e) {
             throw new RuntimeException("Mapping file not found");
         }
@@ -307,10 +307,6 @@ public class CsvReader {
     }
 
     private OntModel createOntologyModel() {
-        JsonObject mappingConfing = this.readConfigMapping();
-        String ontologyFile = mappingConfing.get("ontologyFile").getAsString();
-        String ontologyFormat = mappingConfing.get("ontologyFormat").getAsString();
-
         String ontologyString = null;
         OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
         try {
@@ -399,16 +395,12 @@ public class CsvReader {
         this.mappingFile = mappingFile;
     }
 
-    protected JsonObject readConfigMapping() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
-            String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-            JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
-            JsonObject mappingConfing = mappingJsonObject.get("@configuration").getAsJsonObject();
-            return mappingConfing;
+    public void setRdfFolder(String rdfFolder) {
+        this.rdfFolder = rdfFolder;
+    }
 
-        } catch (IOException e) {
-            throw new RuntimeException("Mapping file not found");
-        }
+    public void setCsvFilesFolder(String csvFilesFolder) {
+        this.csvFilesFolder = csvFilesFolder;
     }
 
 }

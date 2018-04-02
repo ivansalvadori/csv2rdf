@@ -1,0 +1,14 @@
+config:
+  csvFilesFolder: "data_comma_utf8"
+  csvEncode: "UTF-8"
+  csvSeparator: "COMMA"
+  rdfFolder: "output"
+  rdfFormat: "N3"
+  managedUri: http://www.produtos.com.br
+  ontologyFormat: "N3"
+  writeToFile: true
+  singleRdfOutputFile: true
+  resourcesPerFile: 100
+  processWhenStarted: true
+  
+  

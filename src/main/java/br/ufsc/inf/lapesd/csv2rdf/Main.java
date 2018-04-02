@@ -12,7 +12,6 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         SpringApplication.run(Main.class, args);
-        CsvReader reader = new CsvReader();
-        reader.process();
     }
+
 }
