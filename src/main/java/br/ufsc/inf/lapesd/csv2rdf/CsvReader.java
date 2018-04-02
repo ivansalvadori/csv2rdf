@@ -87,7 +87,7 @@ public class CsvReader {
     private boolean writeToFile = true;
 
     @Value("${config.ontologyFormat}")
-    String ontologyFormat = Lang.NTRIPLES.getName();
+    String ontologyFormat = "N3";
 
     private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
     private Model tempModel;
@@ -401,6 +401,10 @@ public class CsvReader {
 
     public void setCsvFilesFolder(String csvFilesFolder) {
         this.csvFilesFolder = csvFilesFolder;
+    }
+
+    public void setOntologyFile(String ontologyFile) {
+        this.ontologyFile = ontologyFile;
     }
 
 }
