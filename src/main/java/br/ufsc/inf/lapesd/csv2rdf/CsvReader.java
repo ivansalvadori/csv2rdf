@@ -58,8 +58,7 @@ import com.google.gson.JsonParser;
 @Component
 public class CsvReader {
 
-    @Value("${config.managedUri}")
-    private String managedUri = "http://example.com";
+    private String resourceDomain = "http://example.com";
 
     @Value("${config.rdfFolder}")
     private String rdfFolder;
@@ -111,6 +110,7 @@ public class CsvReader {
 
     public void process() {
         this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+        this.resourceDomain = this.readResourceDomain();
 
         OntModel ontologyModel = createOntologyModel();
         this.createMapInverseProperties(ontologyModel);
@@ -183,7 +183,7 @@ public class CsvReader {
         StmtIterator listStatements = resource.getModel().listStatements();
         while (listStatements.hasNext()) {
             Statement next = listStatements.next();
-            if (!next.getSubject().getURI().startsWith(this.managedUri)) {
+            if (!next.getSubject().getURI().startsWith(this.resourceDomain)) {
                 toRemove.add(next);
             }
         }
@@ -351,7 +351,7 @@ public class CsvReader {
         String sha2 = sha2(resourceUri);
         URI uri = null;
         try {
-            uri = new URI(this.managedUri + "/" + sha2);
+            uri = new URI(this.resourceDomain + "/" + sha2);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -369,6 +369,18 @@ public class CsvReader {
             System.out.println("SHA-256 error");
         }
         return sha2;
+    }
+
+    private String readResourceDomain() {
+        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
+            String mappingString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
+            JsonObject mappingJsonObject = new JsonParser().parse(mappingString).getAsJsonObject();
+            String managedUri = mappingJsonObject.get("@resourceDomain").getAsString();
+            return managedUri;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Mapping file not found");
+        }
     }
 
     public void register(CsvReaderListener listener) {
@@ -405,6 +417,10 @@ public class CsvReader {
 
     public void setOntologyFile(String ontologyFile) {
         this.ontologyFile = ontologyFile;
+    }
+
+    public void setResourceDomain(String resourceDomain) {
+        this.resourceDomain = resourceDomain;
     }
 
 }

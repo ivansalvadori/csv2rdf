@@ -6,6 +6,7 @@
     "Titlex": "http://www.ssp.sp.gov.br/transparenciassp/dataOcorrencia",
     "TitleC": "http://www.ssp.sp.gov.br/transparenciassp/periodoOcorrencia",
     "TitleD": "http://www.ssp.sp.gov.br/transparenciassp/nomeDelegacia"
-  }
+  },
+  "@resourceDomain": "http://www.produtos.com.br"
 }
 

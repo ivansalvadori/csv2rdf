@@ -4,7 +4,6 @@ config:
   csvSeparator: "COMMA"
   rdfFolder: "output"
   rdfFormat: "N3"
-  managedUri: http://www.produtos.com.br
   ontologyFormat: "N3"
   writeToFile: true
   singleRdfOutputFile: true
