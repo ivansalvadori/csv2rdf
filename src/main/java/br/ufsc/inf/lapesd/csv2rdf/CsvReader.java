@@ -3,9 +3,9 @@ package br.ufsc.inf.lapesd.csv2rdf;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -58,369 +58,373 @@ import com.google.gson.JsonParser;
 @Component
 public class CsvReader {
 
-    private String resourceDomain = "http://example.com";
+	private String resourceDomain = "http://example.com";
 
-    @Value("${config.rdfFolder}")
-    private String rdfFolder;
+	@Value("${config.rdfFolder}")
+	private String rdfFolder;
 
-    @Value("${config.csvFilesFolder}")
-    private String csvFilesFolder;
+	@Value("${config.csvFilesFolder}")
+	private String csvFilesFolder;
 
-    @Value("${config.csvEncode}")
-    private String csvEncode = "UTF-8";
+	@Value("${config.csvEncode}")
+	private String csvEncode = "UTF-8";
 
-    @Value("${config.csvSeparator}")
-    private String csvSeparator = "COMMA";
+	@Value("${config.csvSeparator}")
+	private String csvSeparator = "COMMA";
 
-    @Value("${config.rdfFormat}")
-    private String rdfFormat = Lang.NTRIPLES.getName();
+	@Value("${config.rdfFormat}")
+	private String rdfFormat = Lang.NTRIPLES.getName();
 
-    @Value("${config.singleRdfOutputFile}")
-    private boolean singleRdfOutputFile = true;
+	@Value("${config.singleRdfOutputFile}")
+	private boolean singleRdfOutputFile = true;
 
-    // ignored if singleRdfOutputFile true
-    @Value("${config.resourcesPerFile}")
-    private int resourcesPerFile = 0;
+	// ignored if singleRdfOutputFile true
+	@Value("${config.resourcesPerFile}")
+	private int resourcesPerFile = 0;
 
-    @Value("${config.writeToFile}")
-    private boolean writeToFile = true;
+	@Value("${config.writeToFile}")
+	private boolean writeToFile = true;
 
-    @Value("${config.ontologyFormat}")
-    String ontologyFormat = "N3";
+	@Value("${config.ontologyFormat}")
+	String ontologyFormat = "N3";
 
-    private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
-    private Model tempModel;
-    private int individualsAddedToTempModel = 0;
-    private int inMemoryModelSize = 1000;
-    private int totalProcessedRecords = 0;
-    private String currentFileId = UUID.randomUUID().toString();
-    private String mappingFile = "mapping.jsonld";
-    private String ontologyFile = "ontology.owl";
-    private List<CsvReaderListener> listeners = new ArrayList<>();
+	private Map<String, OntProperty> mapInverseProperties = new HashMap<>();
+	private Model tempModel;
+	private int individualsAddedToTempModel = 0;
+	private int inMemoryModelSize = 1000;
+	private int totalProcessedRecords = 0;
+	private String currentFileId = UUID.randomUUID().toString();
+	private String mappingFile = "mapping.jsonld";
+	private String ontologyFile = "ontology.owl";
+	private List<CsvReaderListener> listeners = new ArrayList<>();
 
-    @Value("${config.processWhenStarted}")
-    private boolean processWhenStarted = false;
+	@Value("${config.processWhenStarted}")
+	private boolean processWhenStarted = false;
 
-    @PostConstruct
-    public void init() {
-        if (processWhenStarted) {
-            process();
-        }
-    }
+	@PostConstruct
+	public void init() {
+		System.out.println("init");
+		if (processWhenStarted) {
+			process();
+		}
+	}
 
-    public void process() {
-        this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-        this.resourceDomain = this.readResourceDomain();
+	public void process() {
+		this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+		this.resourceDomain = this.readResourceDomain();
 
-        OntModel ontologyModel = createOntologyModel();
-        this.createMapInverseProperties(ontologyModel);
+		OntModel ontologyModel = createOntologyModel();
+		this.createMapInverseProperties(ontologyModel);
 
-        try {
-            String csvFilesFolder = this.csvFilesFolder;
-            Collection<File> files = FileUtils.listFiles(new File(csvFilesFolder), null, true);
-            for (File file : files) {
-                System.out.println("reading " + file.getName());
-                Reader in = new FileReader(file.getPath());
+		try {
+			String csvFilesFolder = this.csvFilesFolder;
+			Collection<File> files = FileUtils.listFiles(new File(csvFilesFolder), null, true);
+			for (File file : files) {
+				System.out.println("reading " + file.getName());
 
-                Iterable<CSVRecord> records = null;
+				Reader in = new InputStreamReader(new FileInputStream(file.getPath()), this.csvEncode);
 
-                if (csvSeparator.equalsIgnoreCase("COMMA")) {
-                    records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(in);
-                }
-                if (csvSeparator.equalsIgnoreCase("TAB")) {
-                    records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
-                }
+				Iterable<CSVRecord> records = null;
 
-                for (CSVRecord record : records) {
-                    JsonObject mappingContext = createContextMapping();
-                    Individual resource;
-                    resource = createResourceModel(mappingContext, record);
-                    if (resource == null) {
-                        continue;
-                    }
+				if (csvSeparator.equalsIgnoreCase("COMMA")) {
+					records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(in);
+				} else if (csvSeparator.equalsIgnoreCase("TAB")) {
+					records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
+				} else {
+					records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().withDelimiter(csvSeparator.toCharArray()[0]).parse(in);
+				}
 
-                    if (this.singleRdfOutputFile) {
-                        if (this.individualsAddedToTempModel == this.inMemoryModelSize) {
-                            writeToFile(this.tempModel, currentFileId);
-                            this.tempModel.removeAll();
-                            this.individualsAddedToTempModel = 0;
-                        }
-                    }
+				for (CSVRecord record : records) {
+					JsonObject mappingContext = createContextMapping();
+					Individual resource;
+					resource = createResourceModel(mappingContext, record);
+					if (resource == null) {
+						continue;
+					}
 
-                    else if (this.resourcesPerFile == individualsAddedToTempModel) {
-                        this.currentFileId = UUID.randomUUID().toString();
-                        writeToFile(this.tempModel, currentFileId);
-                        this.tempModel.removeAll();
-                        this.individualsAddedToTempModel = 0;
-                    }
+					if (this.singleRdfOutputFile) {
+						if (this.individualsAddedToTempModel == this.inMemoryModelSize) {
+							writeToFile(this.tempModel, currentFileId);
+							this.tempModel.removeAll();
+							this.individualsAddedToTempModel = 0;
+						}
+					}
 
-                    removeTBox(resource);
+					else if (this.resourcesPerFile == individualsAddedToTempModel) {
+						this.currentFileId = UUID.randomUUID().toString();
+						writeToFile(this.tempModel, currentFileId);
+						this.tempModel.removeAll();
+						this.individualsAddedToTempModel = 0;
+					}
 
-                    this.tempModel.add(resource.getModel());
-                    this.individualsAddedToTempModel++;
-                    this.totalProcessedRecords++;
+					removeTBox(resource);
 
-                    for (CsvReaderListener listener : this.listeners) {
-                        listener.justRead(resource.getModel());
-                    }
-                }
-            }
+					this.tempModel.add(resource.getModel());
+					this.individualsAddedToTempModel++;
+					this.totalProcessedRecords++;
 
-            writeToFile(this.tempModel, currentFileId);
+					for (CsvReaderListener listener : this.listeners) {
+						listener.justRead(resource.getModel());
+					}
+				}
+			}
 
-            for (CsvReaderListener listener : this.listeners) {
-                listener.readProcessFinished();
-            }
-            System.out.println("Process finished. Record processed: " + totalProcessedRecords);
+			writeToFile(this.tempModel, currentFileId);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+			for (CsvReaderListener listener : this.listeners) {
+				listener.readProcessFinished();
+			}
+			System.out.println("Process finished. Record processed: " + totalProcessedRecords);
 
-    private void removeTBox(Individual resource) {
-        List<Statement> toRemove = new ArrayList<>();
-        StmtIterator listStatements = resource.getModel().listStatements();
-        while (listStatements.hasNext()) {
-            Statement next = listStatements.next();
-            if (!next.getSubject().getURI().startsWith(this.resourceDomain)) {
-                toRemove.add(next);
-            }
-        }
-        resource.getModel().remove(toRemove);
-    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    private JsonObject createContextMapping() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
-            String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-            JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
-            return mappingJsonObject.get("@context").getAsJsonObject();
-        } catch (IOException e) {
-            throw new RuntimeException("Mapping file not found");
-        }
-    }
+	private void removeTBox(Individual resource) {
+		List<Statement> toRemove = new ArrayList<>();
+		StmtIterator listStatements = resource.getModel().listStatements();
+		while (listStatements.hasNext()) {
+			Statement next = listStatements.next();
+			if (!next.getSubject().getURI().startsWith(this.resourceDomain)) {
+				toRemove.add(next);
+			}
+		}
+		resource.getModel().remove(toRemove);
+	}
 
-    private void createMapInverseProperties(OntModel ontologyModel) {
-        ExtendedIterator<OntProperty> listAllOntProperties = ontologyModel.listAllOntProperties();
-        while (listAllOntProperties.hasNext()) {
-            OntProperty prop = listAllOntProperties.next();
-            if (prop.hasInverse()) {
-                OntProperty inverseOf = prop.getInverseOf();
-                this.mapInverseProperties.put(prop.getURI(), inverseOf);
-            }
-        }
-    }
+	private JsonObject createContextMapping() {
+		try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
+			String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
+			JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
+			return mappingJsonObject.get("@context").getAsJsonObject();
+		} catch (IOException e) {
+			throw new RuntimeException("Mapping file not found");
+		}
+	}
 
-    private Individual createResourceModel(JsonObject mappingContext, CSVRecord record) {
-        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-        OntClass resourceClass = model.createClass(mappingContext.get("@type").getAsString());
+	private void createMapInverseProperties(OntModel ontologyModel) {
+		ExtendedIterator<OntProperty> listAllOntProperties = ontologyModel.listAllOntProperties();
+		while (listAllOntProperties.hasNext()) {
+			OntProperty prop = listAllOntProperties.next();
+			if (prop.hasInverse()) {
+				OntProperty inverseOf = prop.getInverseOf();
+				this.mapInverseProperties.put(prop.getURI(), inverseOf);
+			}
+		}
+	}
 
-        String uri = null;
-        try {
-            uri = createResourceUri(mappingContext, record, resourceClass.getURI());
-        } catch (UriPropertyNullException e) {
-            return null;
-        }
+	private Individual createResourceModel(JsonObject mappingContext, CSVRecord record) {
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+		OntClass resourceClass = model.createClass(mappingContext.get("@type").getAsString());
 
-        model.createClass(mappingContext.get("@type").getAsString());
-        Individual individual = model.createIndividual(uri, resourceClass);
-        if (!mappingContext.isJsonNull()) {
-            Set<Entry<String, JsonElement>> entrySet = mappingContext.getAsJsonObject().entrySet();
-            for (Entry<String, JsonElement> entry : entrySet) {
-                if (entry.getKey().equals("@type") || entry.getKey().equals("@uriProperty")) {
-                    continue;
-                }
-                if (entry.getValue().isJsonPrimitive()) {
-                    DatatypeProperty property = model.createDatatypeProperty(entry.getValue().getAsString());
-                    try {
-                        String recordValue = record.get(entry.getKey());
-                        recordValue = new String(recordValue.getBytes(this.csvEncode), "UTF-8");
-                        individual.addProperty(property, recordValue);
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (entry.getValue().isJsonObject()) {
-                    Individual innerResource = createResourceModel(entry.getValue().getAsJsonObject(), record);
-                    if (innerResource == null) {
-                        continue;
-                    }
-                    ObjectProperty property = model.createObjectProperty(entry.getKey());
+		String uri = null;
+		try {
+			uri = createResourceUri(mappingContext, record, resourceClass.getURI());
+		} catch (UriPropertyNullException e) {
+			return null;
+		}
 
-                    individual.addProperty(property, innerResource);
+		model.createClass(mappingContext.get("@type").getAsString());
+		Individual individual = model.createIndividual(uri, resourceClass);
+		if (!mappingContext.isJsonNull()) {
+			Set<Entry<String, JsonElement>> entrySet = mappingContext.getAsJsonObject().entrySet();
+			for (Entry<String, JsonElement> entry : entrySet) {
+				String csvHeader = entry.getKey();
+				if (csvHeader.equals("@type") || csvHeader.equals("@uriProperty")) {
+					continue;
+				}
+				if (entry.getValue().isJsonPrimitive()) {
+					DatatypeProperty property = model.createDatatypeProperty(entry.getValue().getAsString());
+					try {
+						String recordValue = record.get(csvHeader);
+						recordValue = new String(recordValue.getBytes(this.csvEncode), "UTF-8");
+						individual.addProperty(property, recordValue);
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+				}
+				if (entry.getValue().isJsonObject()) {
+					Individual innerResource = createResourceModel(entry.getValue().getAsJsonObject(), record);
+					if (innerResource == null) {
+						continue;
+					}
+					ObjectProperty property = model.createObjectProperty(csvHeader);
 
-                    if (mapInverseProperties.get(property.getURI()) != null) {
-                        OntProperty inverseOf = mapInverseProperties.get(property.getURI());
-                        innerResource.addProperty(inverseOf, individual);
-                    }
-                    individual.getModel().add(innerResource.getModel());
-                }
-                if (entry.getValue().isJsonArray()) {
-                    JsonArray asJsonArray = entry.getValue().getAsJsonArray();
-                    Iterator<JsonElement> iterator = asJsonArray.iterator();
-                    while (iterator.hasNext()) {
-                        JsonElement next = iterator.next();
-                        if (next.isJsonObject()) {
-                            Individual innerResource = createResourceModel(next.getAsJsonObject(), record);
-                            if (innerResource == null) {
-                                continue;
-                            }
-                            ObjectProperty property = model.createObjectProperty(entry.getKey());
+					individual.addProperty(property, innerResource);
 
-                            individual.addProperty(property, innerResource);
+					if (mapInverseProperties.get(property.getURI()) != null) {
+						OntProperty inverseOf = mapInverseProperties.get(property.getURI());
+						innerResource.addProperty(inverseOf, individual);
+					}
+					individual.getModel().add(innerResource.getModel());
+				}
+				if (entry.getValue().isJsonArray()) {
+					JsonArray asJsonArray = entry.getValue().getAsJsonArray();
+					Iterator<JsonElement> iterator = asJsonArray.iterator();
+					while (iterator.hasNext()) {
+						JsonElement next = iterator.next();
+						if (next.isJsonObject()) {
+							Individual innerResource = createResourceModel(next.getAsJsonObject(), record);
+							if (innerResource == null) {
+								continue;
+							}
+							ObjectProperty property = model.createObjectProperty(csvHeader);
 
-                            if (mapInverseProperties.get(property.getURI()) != null) {
-                                OntProperty inverseOf = mapInverseProperties.get(property.getURI());
-                                innerResource.addProperty(inverseOf, individual);
-                            }
-                            individual.getModel().add(innerResource.getModel());
-                        }
-                    }
-                }
-            }
-        }
-        return individual;
-    }
+							individual.addProperty(property, innerResource);
 
-    private void writeToFile(Model model, String fileId) {
-        String fileName = this.rdfFolder + "/output_" + fileId + ".ntriples";
-        write(model, fileName);
-    }
+							if (mapInverseProperties.get(property.getURI()) != null) {
+								OntProperty inverseOf = mapInverseProperties.get(property.getURI());
+								innerResource.addProperty(inverseOf, individual);
+							}
+							individual.getModel().add(innerResource.getModel());
+						}
+					}
+				}
+			}
+		}
+		return individual;
+	}
 
-    private void write(Model model, String fileName) {
-        if (!this.writeToFile) {
-            return;
-        }
+	private void writeToFile(Model model, String fileId) {
+		String fileName = this.rdfFolder + "/output_" + fileId + ".ntriples";
+		write(model, fileName);
+	}
 
-        File directory = new File(this.rdfFolder);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
+	private void write(Model model, String fileName) {
+		if (!this.writeToFile) {
+			return;
+		}
 
-        try (FileWriter fostream = new FileWriter(fileName, true);) {
-            BufferedWriter out = new BufferedWriter(fostream);
-            model.write(out, this.rdfFormat);
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+		File directory = new File(this.rdfFolder);
+		if (!directory.exists()) {
+			directory.mkdir();
+		}
 
-    private OntModel createOntologyModel() {
-        String ontologyString = null;
-        OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
-        try {
-            ontologyString = new String(Files.readAllBytes(Paths.get(ontologyFile)));
-        } catch (IOException e) {
-            return model;
-        }
+		try (FileWriter fostream = new FileWriter(fileName, true);) {
+			BufferedWriter out = new BufferedWriter(fostream);
+			model.write(out, this.rdfFormat);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-        model.read(new StringReader(ontologyString), null, ontologyFormat);
-        return model;
-    }
+	private OntModel createOntologyModel() {
+		String ontologyString = null;
+		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
+		try {
+			ontologyString = new String(Files.readAllBytes(Paths.get(ontologyFile)));
+		} catch (IOException e) {
+			return model;
+		}
 
-    private String createResourceUri(JsonObject mappingContext, CSVRecord record, String resourceTypeUri) {
-        String resourceUri = resourceTypeUri;
+		model.read(new StringReader(ontologyString), null, ontologyFormat);
+		return model;
+	}
 
-        if (mappingContext.get("@uriProperty").isJsonPrimitive()) {
-            String propertyKey = mappingContext.get("@uriProperty").getAsString();
-            if (propertyKey.equalsIgnoreCase("RandomUri")) {
-                resourceUri = UUID.randomUUID().toString();
-            } else {
-                resourceUri = record.get(propertyKey);
-                if (StringUtils.isEmpty(resourceUri)) {
-                    throw new UriPropertyNullException();
-                }
-            }
-        } else if (mappingContext.get("@uriProperty").isJsonArray()) {
-            JsonArray asJsonArray = mappingContext.get("@uriProperty").getAsJsonArray();
-            Iterator<JsonElement> iterator = asJsonArray.iterator();
-            while (iterator.hasNext()) {
-                JsonElement next = iterator.next();
-                if (next.isJsonPrimitive()) {
-                    String propertyKey = next.getAsString();
-                    String csvPropertyValue = record.get(propertyKey);
-                    if (StringUtils.isEmpty(csvPropertyValue)) {
-                        throw new UriPropertyNullException();
-                    }
-                    resourceUri = resourceUri + csvPropertyValue;
-                }
-            }
-        }
+	private String createResourceUri(JsonObject mappingContext, CSVRecord record, String resourceTypeUri) {
+		String resourceUri = resourceTypeUri;
 
-        String sha2 = sha2(resourceUri);
-        URI uri = null;
-        try {
-            uri = new URI(this.resourceDomain + "/" + sha2);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return uri.toString();
+		if (mappingContext.get("@uriProperty").isJsonPrimitive()) {
+			String propertyKey = mappingContext.get("@uriProperty").getAsString();
+			if (propertyKey.equalsIgnoreCase("RandomUri")) {
+				resourceUri = UUID.randomUUID().toString();
+			} else {
+				resourceUri = record.get(propertyKey);
+				if (StringUtils.isEmpty(resourceUri)) {
+					throw new UriPropertyNullException();
+				}
+			}
+		} else if (mappingContext.get("@uriProperty").isJsonArray()) {
+			JsonArray asJsonArray = mappingContext.get("@uriProperty").getAsJsonArray();
+			Iterator<JsonElement> iterator = asJsonArray.iterator();
+			while (iterator.hasNext()) {
+				JsonElement next = iterator.next();
+				if (next.isJsonPrimitive()) {
+					String propertyKey = next.getAsString();
+					String csvPropertyValue = record.get(propertyKey);
+					if (StringUtils.isEmpty(csvPropertyValue)) {
+						throw new UriPropertyNullException();
+					}
+					resourceUri = resourceUri + csvPropertyValue;
+				}
+			}
+		}
 
-    }
+		String sha2 = sha2(resourceUri);
+		URI uri = null;
+		try {
+			uri = new URI(this.resourceDomain + "/" + sha2);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return uri.toString();
 
-    private String sha2(String input) {
-        String sha2 = null;
-        try {
-            MessageDigest msdDigest = MessageDigest.getInstance("SHA-256");
-            msdDigest.update(input.getBytes("UTF-8"), 0, input.length());
-            sha2 = DatatypeConverter.printHexBinary(msdDigest.digest());
-        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-            System.out.println("SHA-256 error");
-        }
-        return sha2;
-    }
+	}
 
-    private String readResourceDomain() {
-        try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
-            String mappingString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-            JsonObject mappingJsonObject = new JsonParser().parse(mappingString).getAsJsonObject();
-            String managedUri = mappingJsonObject.get("@resourceDomain").getAsString();
-            return managedUri;
+	private String sha2(String input) {
+		String sha2 = null;
+		try {
+			MessageDigest msdDigest = MessageDigest.getInstance("SHA-256");
+			msdDigest.update(input.getBytes("UTF-8"), 0, input.length());
+			sha2 = DatatypeConverter.printHexBinary(msdDigest.digest());
+		} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+			System.out.println("SHA-256 error");
+		}
+		return sha2;
+	}
 
-        } catch (IOException e) {
-            throw new RuntimeException("Mapping file not found");
-        }
-    }
+	private String readResourceDomain() {
+		try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
+			String mappingString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
+			JsonObject mappingJsonObject = new JsonParser().parse(mappingString).getAsJsonObject();
+			String managedUri = mappingJsonObject.get("@resourceDomain").getAsString();
+			return managedUri;
 
-    public void register(CsvReaderListener listener) {
-        this.listeners.add(listener);
-    }
+		} catch (IOException e) {
+			throw new RuntimeException("Mapping file not found");
+		}
+	}
 
-    public void setWriteToFile(boolean writeToFile) {
-        this.writeToFile = writeToFile;
-    }
+	public void register(CsvReaderListener listener) {
+		this.listeners.add(listener);
+	}
 
-    public void setRdfFormat(String rdfFormat) {
-        this.rdfFormat = rdfFormat;
-    }
+	public void setWriteToFile(boolean writeToFile) {
+		this.writeToFile = writeToFile;
+	}
 
-    public void setCsvEncode(String csvEncode) {
-        this.csvEncode = csvEncode;
-    }
+	public void setRdfFormat(String rdfFormat) {
+		this.rdfFormat = rdfFormat;
+	}
 
-    public void setCsvSeparator(String csvSeparator) {
-        this.csvSeparator = csvSeparator;
-    }
+	public void setCsvEncode(String csvEncode) {
+		this.csvEncode = csvEncode;
+	}
 
-    public void setMappingFile(String mappingFile) {
-        this.mappingFile = mappingFile;
-    }
+	public void setCsvSeparator(String csvSeparator) {
+		this.csvSeparator = csvSeparator;
+	}
 
-    public void setRdfFolder(String rdfFolder) {
-        this.rdfFolder = rdfFolder;
-    }
+	public void setMappingFile(String mappingFile) {
+		this.mappingFile = mappingFile;
+	}
 
-    public void setCsvFilesFolder(String csvFilesFolder) {
-        this.csvFilesFolder = csvFilesFolder;
-    }
+	public void setRdfFolder(String rdfFolder) {
+		this.rdfFolder = rdfFolder;
+	}
 
-    public void setOntologyFile(String ontologyFile) {
-        this.ontologyFile = ontologyFile;
-    }
+	public void setCsvFilesFolder(String csvFilesFolder) {
+		this.csvFilesFolder = csvFilesFolder;
+	}
 
-    public void setResourceDomain(String resourceDomain) {
-        this.resourceDomain = resourceDomain;
-    }
+	public void setOntologyFile(String ontologyFile) {
+		this.ontologyFile = ontologyFile;
+	}
+
+	public void setResourceDomain(String resourceDomain) {
+		this.resourceDomain = resourceDomain;
+	}
 
 }

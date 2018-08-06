@@ -1,8 +1,8 @@
 config:
-  csvFilesFolder: "data_comma_utf8"
-  csvEncode: "UTF-8"
-  csvSeparator: "COMMA"
-  rdfFolder: "output"
+  csvFilesFolder: "csv"
+  csvEncode: "ISO-8859-1"
+  csvSeparator: ";"
+  rdfFolder: "rdf"
   rdfFormat: "N3"
   ontologyFormat: "N3"
   writeToFile: true

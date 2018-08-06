@@ -1,0 +1,5 @@
+It requires adding the following VM arguments when running with JdK 9+
+--add-opens java.base/java.lang=ALL-UNNAMED
+
+Command line execution example:
+java --add-opens java.base/java.lang=ALL-UNNAMED -jar file.jar
