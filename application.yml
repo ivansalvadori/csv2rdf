@@ -3,7 +3,7 @@ config:
   csvEncode: "ISO-8859-1"
   csvSeparator: ";"
   rdfFolder: "rdf"
-  rdfFormat: "N3"
+  rdfFormat: "NTRIPLE"
   ontologyFormat: "N3"
   writeToFile: true
   singleRdfOutputFile: true

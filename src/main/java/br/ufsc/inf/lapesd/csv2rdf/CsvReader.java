@@ -103,7 +103,6 @@ public class CsvReader {
 
 	@PostConstruct
 	public void init() {
-		System.out.println("init");
 		if (processWhenStarted) {
 			process();
 		}
@@ -238,7 +237,7 @@ public class CsvReader {
 					DatatypeProperty property = model.createDatatypeProperty(entry.getValue().getAsString());
 					try {
 						String recordValue = record.get(csvHeader);
-						recordValue = new String(recordValue.getBytes(this.csvEncode), "UTF-8");
+						recordValue = new String(recordValue.getBytes(this.csvEncode), this.csvEncode);
 						individual.addProperty(property, recordValue);
 					} catch (UnsupportedEncodingException e) {
 						e.printStackTrace();
