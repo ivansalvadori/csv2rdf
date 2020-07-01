@@ -1,28 +1,18 @@
 {
   "@context": {
-    "@type": "http://ontoloy/Pagamento",
-    "@uriProperty": "RandomUri",
-    "Código Pagamento": "http://ontoloy/codPagamento",
-    "Data Emissão": "http://ontoloy/dataEmissao",
-    "Código Tipo Documento": "http://ontoloy/codigoTipoDocumento",
-    "Tipo Documento": "http://ontoloy/descTipoDocumento",
-    "Código Órgão Superior": "http://ontoloy/codOrgaoSuperior",
-    "Órgão Superior": "http://ontoloy/nomeOrgaoSuperior",
-    "Código Órgão": "http://ontoloy/codOrgao",
-    "Órgão": "http://ontoloy/nomeOrgao",
-    "Código Unidade Gestora": "http://ontoloy/codUnidadeGestora",
-    "Unidade Gestora": "http://ontoloy/nomeUnidadeGestora",
-    "Código Gestão": "http://ontoloy/codGestao",
-    "Gestão": "http://ontoloy/nomeGestao",
-    "Código Favorecido": "http://ontoloy/codFavorecido",
-    "Favorecido": "http://ontoloy/nomeFavorecido",
-    "Observação": "http://ontoloy/observacao",    
-    "Categoria de Despesa": "http://ontoloy/catDespesa",
-    "Grupo de Despesa": "http://ontoloy/grupoDespesa",
-    "Modalidade de Aplicação": "http://ontoloy/modadelidadeDespesa",
-    "Elemento de Despesa": "http://ontoloy/elementoDespesa",    
-    "Valor Original do Pagamento": "http://ontoloy/valorPagamento"
+    "@type": "http://ontoloy/Person",
+    "@uriProperty": "@GenerateUri",
+    "name": "http://ontoloy/name",
+    "email": "http://ontoloy/email",
+    "birth_date": "http://ontoloy/birthDate",
+    "occupation": "http://ontoloy/occupation",
+    "http://ontoloy/birthPlace":{
+	    "@type": "http://ontoloy/Place",
+	    "@uriProperty": ["city", "state"],
+	    "city": "http://ontoloy/cityName",
+	    "state": "http://ontoloy/stateName",
+	    "country": "http://ontoloy/countryName"
+    }   
   },
-  "@resourceDomain": "http://www.pagamentos.gov.br"
+  "@resourceDomain": "http://www.example.com"
 }
-

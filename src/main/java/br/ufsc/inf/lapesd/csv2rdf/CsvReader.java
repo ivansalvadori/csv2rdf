@@ -3,9 +3,11 @@ package br.ufsc.inf.lapesd.csv2rdf;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -27,8 +29,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
@@ -47,6 +49,8 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -55,8 +59,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+
+
+
 @Component
 public class CsvReader {
+	final Logger logger = LoggerFactory.getLogger(Main.class);
 
 	private String resourceDomain = "http://example.com";
 
@@ -74,6 +82,9 @@ public class CsvReader {
 
 	@Value("${config.rdfFormat}")
 	private String rdfFormat = Lang.NTRIPLES.getName();
+	
+	@Value("${config.csvEncode}")
+	private String rdfEncode = "UTF-8";
 
 	@Value("${config.singleRdfOutputFile}")
 	private boolean singleRdfOutputFile = true;
@@ -102,7 +113,7 @@ public class CsvReader {
 	private boolean processWhenStarted = false;
 
 	@PostConstruct
-	public void init() {
+	public void init() { 
 		if (processWhenStarted) {
 			process();
 		}
@@ -119,7 +130,7 @@ public class CsvReader {
 			String csvFilesFolder = this.csvFilesFolder;
 			Collection<File> files = FileUtils.listFiles(new File(csvFilesFolder), null, true);
 			for (File file : files) {
-				System.out.println("reading " + file.getName());
+				logger.info("reading " + file.getName());
 
 				Reader in = new InputStreamReader(new FileInputStream(file.getPath()), this.csvEncode);
 
@@ -173,7 +184,7 @@ public class CsvReader {
 			for (CsvReaderListener listener : this.listeners) {
 				listener.readProcessFinished();
 			}
-			System.out.println("Process finished. Record processed: " + totalProcessedRecords);
+			logger.info("Process finished. Record(s) processed: " + totalProcessedRecords);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -195,7 +206,7 @@ public class CsvReader {
 	private JsonObject createContextMapping() {
 		try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
 			String mappingContextString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-			JsonObject mappingJsonObject = new JsonParser().parse(mappingContextString).getAsJsonObject();
+			JsonObject mappingJsonObject = JsonParser.parseString(mappingContextString).getAsJsonObject();
 			return mappingJsonObject.get("@context").getAsJsonObject();
 		} catch (IOException e) {
 			throw new RuntimeException("Mapping file not found");
@@ -249,7 +260,6 @@ public class CsvReader {
 						continue;
 					}
 					ObjectProperty property = model.createObjectProperty(csvHeader);
-
 					individual.addProperty(property, innerResource);
 
 					if (mapInverseProperties.get(property.getURI()) != null) {
@@ -301,7 +311,9 @@ public class CsvReader {
 		}
 
 		try (FileWriter fostream = new FileWriter(fileName, true);) {
-			BufferedWriter out = new BufferedWriter(fostream);
+			BufferedWriter out = new BufferedWriter
+				    (new OutputStreamWriter(new FileOutputStream(fileName), this.rdfEncode));
+			
 			model.write(out, this.rdfFormat);
 			out.close();
 		} catch (IOException e) {
@@ -327,7 +339,7 @@ public class CsvReader {
 
 		if (mappingContext.get("@uriProperty").isJsonPrimitive()) {
 			String propertyKey = mappingContext.get("@uriProperty").getAsString();
-			if (propertyKey.equalsIgnoreCase("RandomUri")) {
+			if (propertyKey.equalsIgnoreCase("@GenerateUri")) {
 				resourceUri = UUID.randomUUID().toString();
 			} else {
 				resourceUri = record.get(propertyKey);
@@ -367,7 +379,7 @@ public class CsvReader {
 		try {
 			MessageDigest msdDigest = MessageDigest.getInstance("SHA-256");
 			msdDigest.update(input.getBytes("UTF-8"), 0, input.length());
-			sha2 = DatatypeConverter.printHexBinary(msdDigest.digest());
+			sha2 =  Hex.encodeHexString(msdDigest.digest());
 		} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
 			System.out.println("SHA-256 error");
 		}
@@ -377,7 +389,7 @@ public class CsvReader {
 	private String readResourceDomain() {
 		try (FileInputStream inputStream = FileUtils.openInputStream(new File(this.mappingFile))) {
 			String mappingString = IOUtils.toString(inputStream, StandardCharsets.UTF_8.name());
-			JsonObject mappingJsonObject = new JsonParser().parse(mappingString).getAsJsonObject();
+			JsonObject mappingJsonObject = JsonParser.parseString(mappingString).getAsJsonObject();
 			String managedUri = mappingJsonObject.get("@resourceDomain").getAsString();
 			return managedUri;
 
@@ -426,4 +438,7 @@ public class CsvReader {
 		this.resourceDomain = resourceDomain;
 	}
 
+	public void setRdfEncode(String rdfEncode) {
+		this.rdfEncode = rdfEncode;
+	}
 }

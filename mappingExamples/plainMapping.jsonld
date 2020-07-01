@@ -1,0 +1,14 @@
+{
+  "@context": {
+    "@type": "http://ontoloy/Person",
+    "@uriProperty": "RandomUri",
+    "name": "http://ontoloy/name",
+    "email": "http://ontoloy/email",
+    "birth_date": "http://ontoloy/birthDate",
+    "occupation": "http://ontoloy/occupation",
+    "city": "http://ontoloy/cityName",
+    "state": "http://ontoloy/stateName",
+    "country": "http://ontoloy/countryName"
+  },
+  "@resourceDomain": "http://www.example.com"
+}

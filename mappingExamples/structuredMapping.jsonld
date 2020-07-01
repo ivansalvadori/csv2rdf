@@ -1,0 +1,18 @@
+{
+  "@context": {
+    "@type": "http://ontoloy/Person",
+    "@uriProperty": "@GenerateUri",
+    "name": "http://ontoloy/name",
+    "email": "http://ontoloy/email",
+    "birth_date": "http://ontoloy/birthDate",
+    "occupation": "http://ontoloy/occupation",
+    "http://ontoloy/birthPlace":{
+	    "@type": "http://ontoloy/Place",
+	    "@uriProperty": ["city", "state"],
+	    "city": "http://ontoloy/cityName",
+	    "state": "http://ontoloy/stateName",
+	    "country": "http://ontoloy/countryName"
+    }   
+  },
+  "@resourceDomain": "http://www.example.com"
+}

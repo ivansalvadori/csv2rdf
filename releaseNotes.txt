@@ -1,0 +1,9 @@
+Release Notes:
+
+1.0.0
+-------
+A tool for converting CSV files into RDF triples.
+Features:
+ - Linked Hierarchy structures.
+ - Support for OWL:inverseOf.
+ - Single-file or multiple-files RDF materialization.   

@@ -3,5 +3,10 @@
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix onto:  <http://ontoloy/> .
  
-onto:Pagamento a owl:Class .
+onto:Person a owl:Class .
+onto:Place a owl:Class .
+onto:Country a owl:Class .
 
+onto:birthPlace a rdf:Property .
+onto:isBirthPlaceOf a rdf:Property .
+onto:birthPlace owl:inverseOf  onto:isBirthPlaceOf .

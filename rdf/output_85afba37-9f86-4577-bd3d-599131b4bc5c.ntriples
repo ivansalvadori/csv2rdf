@@ -1,0 +1,29 @@
+<http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> <http://ontoloy/isBirthPlaceOf> <http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> .
+<http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> <http://ontoloy/countryName> "Brazil" .
+<http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> <http://ontoloy/stateName> "São Paulo" .
+<http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> <http://ontoloy/cityName> "São Paulo" .
+<http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontoloy/Place> .
+<http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontoloy/Person> .
+<http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> <http://ontoloy/name> "Ayrton Senna" .
+<http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> <http://ontoloy/email> "ayrton@senna.com.br" .
+<http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> <http://ontoloy/birthDate> "21/03/1960" .
+<http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> <http://ontoloy/occupation> "Driver" .
+<http://www.example.com/64134e97776013763d7adb45880a2b398b250ec4bea06fa6e0c5a29bc35f0832> <http://ontoloy/birthPlace> <http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> .
+<http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontoloy/Person> .
+<http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> <http://ontoloy/name> "Oscar Niemeyer" .
+<http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> <http://ontoloy/email> "oscar@niemeyer.com.br" .
+<http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> <http://ontoloy/birthDate> "15/02/1907" .
+<http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> <http://ontoloy/occupation> "Architect" .
+<http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> <http://ontoloy/birthPlace> <http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> .
+<http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontoloy/Person> .
+<http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> <http://ontoloy/name> "Tom Jobin" .
+<http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> <http://ontoloy/email> "tom@jobin.com.br" .
+<http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> <http://ontoloy/birthDate> "25/01/1927" .
+<http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> <http://ontoloy/occupation> "Composer" .
+<http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> <http://ontoloy/birthPlace> <http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> .
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> <http://ontoloy/isBirthPlaceOf> <http://www.example.com/ff47daee4a43ae75921108dcd132cc97e170ef7387eeaabeb1761e6ec6726261> .
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> <http://ontoloy/isBirthPlaceOf> <http://www.example.com/1181409bea33c00a67f5ed5c72b227d8400320e84ddd3fcf544260b3cdc41595> .
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> <http://ontoloy/countryName> "Brazil" .
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> <http://ontoloy/stateName> "Rio de Janeiro" .
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> <http://ontoloy/cityName> "Rio de Janeiro" .
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ontoloy/Place> .
