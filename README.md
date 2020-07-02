@@ -283,9 +283,7 @@ The resulting materialization:
 
 
 ## InverseOf property
-csv2rdf supports OWL inverse property.
-To enable this feature, it is necessary to provide an ontology describing the properties that has a "owl:inverseOf" relationship.
-Below an example of "owl:inverseOf" definition.
+csv2rdf supports OWL inverse property. To enable this feature, it is necessary to provide an ontology describing the properties and their corresponding "owl:inverseOf" relationship. Below an example of "owl:inverseOf" definition.
 
 ontology.owl
 
