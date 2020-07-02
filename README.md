@@ -30,7 +30,7 @@ The path for CSV files. All files inside this folder will be processed.
 
 #### csvEncode: 
 The character encoding for CSV file(s).
-Valid enconding:
+Valid encodings:
 
 ```
 ISO-8859-1
@@ -45,7 +45,7 @@ UTF-8
 The token used to separate CSV values. For tabular separator use "TAB".
 
 #### rdfFolder: 
-The path for the output RDF file(s).
+The path to the output RDF file(s).
 
 #### rdfFormat: 
 The RDF serialization format. 
@@ -61,7 +61,7 @@ N3
 #### rdfEncode: 
 The character encoding for RDF output file(s).
 
-Valid enconding:
+Valid encodings:
 ```
 ISO-8859-1
 US-ASCII
@@ -86,7 +86,7 @@ N3
 ####  writeToFile: 
 Write the RDF output to file.
 It is possible to use csv2rdf as a developing library.
-Therefore, this property keep the resulting RDF materialization in memory.
+Therefore, this property keeps the resulting RDF materialization in memory.
 
 Valid values:
 ```
@@ -95,8 +95,7 @@ false
 ```
 
 ####  singleRdfOutputFile:
-This property sets if all the resulting RDF triples will be written in a single file. This property is only applied when writeToFile:true.
-
+Allows materializing RDF triples into a single-file or multi-files. Only applied when writeToFile: true.
 Valid values:
 ```
 true
@@ -104,13 +103,12 @@ false
 ```
 
 #### resourcesPerFile:
-The number of resources (RDF individual) for each output file.  This property is only applied when singleRdfOutputFile:false.
+The number of resources (RDF individual) per output file.  Only applied when singleRdfOutputFile:false.
 
 
 #### processWhenStarted:
-When csv2rdf is used as developing library, the developer may want to control when to start de convertion process.
-For using csv2rdf as a tool, set this property true. Then, the convertion process will start immediatly.
-
+When csv2rdf is used as a library, the developer may want to control when to start the conversion process.
+For using csv2rdf as a tool, set this property "true" to immediately initiate the process via command line.
 Valid values:
 ```
 true
@@ -118,19 +116,18 @@ false
 ```
 
 ### mapping.jsonld 
-This file is used to map CSV headers to semantic properties of a given ontology.
-the maping is represented in JSON-LD (JSON Linked Data).
+This file is used for mapping CSV headers to semantic properties of a given ontology.
+the mapping is represented in JSON-LD (JSON Linked Data).
 
 
 # How it works?
 
-Lets take as example a CSV file that contians information about notable people from Brazil:
-
+Let us take as an example a CSV file that contains information about notable people from Brazil:
 ```
-name,email,birth_date,occupation,city,state,country
-Tom Jobin,tom@jobin.com.br,25/01/1927,Composer,Rio de Janeiro,Rio de Janeiro,Brazil
-Ayrton Senna,ayrton@senna.com.br,21/03/1960,Driver,São Paulo,São Paulo,Brazil
-Oscar Niemeyer,oscar@niemeyer.com.br,15/02/1907,Architect,Rio de Janeiro,Rio de Janeiro,Brazil
+name,birth_date,occupation,city,state,country
+Ayrton Senna,21/03/1960,Driver,São Paulo,São Paulo,Brazil
+Tom Jobin,25/01/1927,Composer,Rio de Janeiro,Rio de Janeiro,Brazil
+Oscar Niemeyer,15/02/1907,Architect,Rio de Janeiro,Rio de Janeiro,Brazil
 ```
 A more friendly representation:
 
@@ -203,26 +200,25 @@ Results in a single RDF output file containing:
 ```
 
 It is important to mention that the ontology is optional.
-All semantic properties used to map CSV headers will be used regardless a formal and explicit definition.
-The mapping contains four reserveds words:
+All semantic properties used to map CSV headers will be used regardless of a formal and explicit definition.
+The mapping contains four reserved words:
 
 #### @type 
-Used to associate each CSV record to a semantic class.
+Associates each CSV record with a semantic class.
 
 #### @uriProperty 
-Used to define the resource URI.
-It accepts two type of values:
+Defines the resource URI.
+It accepts two types of value:
  * @GenerateUri: generates a unique URI for each resource.  
- * Array of CSV headers: generats a URI based on headers. CSV records that contain the same value for the predefind headers will be merged to a single resource.
+ * Array of CSV headers: generates a URI based on headers. CSV records that contain the same value for the predefined headers will be merged into a single resource.
  
 #### @resourceDomain
-Used to define a domain for resources.
+Defines the resource domain.
 
 
 ## Linked Resources
-
-It is possible to create a more complex RDf materializtions.
-The following mapping associates a CSV record to two distinct and linked resources.
+It is possible to create a more complex RDF conversion.
+The following mapping associates a CSV record with two distinct and linked resources.
 The CSV headers "name", "birth_date" and "occupation" are mapped to a resource instance of "http://ontoloy/Person".
 The CSV headers "city", "state", and "country" are mapped to a resource instance of "http://ontoloy/Place".
 These resources are linked with one another by the property "http://ontoloy/birthPlace".
@@ -287,6 +283,11 @@ The resulting materialization:
 
 
 ## InverseOf property
+csv2rdf supports OWL inverse property.
+To enable this feature, it is necessary to provide an ontology describing the properties that has a "owl:inverseOf" relationship.
+Below an example of "owl:inverseOf" definition.
+
+ontology.owl
 
 ````
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -304,6 +305,7 @@ onto:birthPlace owl:inverseOf  onto:isBirthPlaceOf .
 
 ````
 
+By adding the ontology.owl file, csv2rdf will produce the following output RDF:
 
 ```
 <http://www.example.com/efe981d95d663e5afe073648c77010>        
