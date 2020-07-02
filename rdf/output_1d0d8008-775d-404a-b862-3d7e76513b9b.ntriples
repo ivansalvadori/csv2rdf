@@ -1,0 +1,34 @@
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.example.com/95ee8342ade8e7566a3a5413e30ced344943f53d156f2149914a0ff8c44e35e8>
+        a                             <http://ontoloy/Person> ;
+        <http://ontoloy/birthDate>    "21/03/1960" ;
+        <http://ontoloy/cityName>     "São Paulo" ;
+        <http://ontoloy/countryName>  "Brazil" ;
+        <http://ontoloy/email>        "ayrton@senna.com.br" ;
+        <http://ontoloy/name>         "Ayrton Senna" ;
+        <http://ontoloy/occupation>   "Driver" ;
+        <http://ontoloy/stateName>    "São Paulo" .
+
+<http://www.example.com/a1fcbc1222c25937952b65501fa49ad83e2037cc5e25cb9f3e83e912eeb28c20>
+        a                             <http://ontoloy/Person> ;
+        <http://ontoloy/birthDate>    "25/01/1927" ;
+        <http://ontoloy/cityName>     "Rio de Janeiro" ;
+        <http://ontoloy/countryName>  "Brazil" ;
+        <http://ontoloy/email>        "tom@jobin.com.br" ;
+        <http://ontoloy/name>         "Tom Jobin" ;
+        <http://ontoloy/occupation>   "Composer" ;
+        <http://ontoloy/stateName>    "Rio de Janeiro" .
+
+<http://www.example.com/2a7d2526207b7fccf86bb11933fdf66ffb00df661720090590cb00f2fd6145dd>
+        a                             <http://ontoloy/Person> ;
+        <http://ontoloy/birthDate>    "15/02/1907" ;
+        <http://ontoloy/cityName>     "Rio de Janeiro" ;
+        <http://ontoloy/countryName>  "Brazil" ;
+        <http://ontoloy/email>        "oscar@niemeyer.com.br" ;
+        <http://ontoloy/name>         "Oscar Niemeyer" ;
+        <http://ontoloy/occupation>   "Architect" ;
+        <http://ontoloy/stateName>    "Rio de Janeiro" .

@@ -1,0 +1,44 @@
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.example.com/3bb2ca77d7adfdfac33eb4670d4f55ce433961e895f5ffd37aa5c7577d6b2edf>
+        a                            <http://ontoloy/Person> ;
+        <http://ontoloy/birthDate>   "25/01/1927" ;
+        <http://ontoloy/birthPlace>  <http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> ;
+        <http://ontoloy/email>       "tom@jobin.com.br" ;
+        <http://ontoloy/name>        "Tom Jobin" ;
+        <http://ontoloy/occupation>  "Composer" .
+
+<http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e>
+        a                             <http://ontoloy/Place> ;
+        <http://ontoloy/cityName>     "São Paulo" ;
+        <http://ontoloy/countryName>  "Brazil" ;
+        <http://ontoloy/isBirthPlaceOf>
+                <http://www.example.com/efe981d95d663e5afe073648c77010b2cdd739229bca2cef435d30967bc5cd33> ;
+        <http://ontoloy/stateName>    "São Paulo" .
+
+<http://www.example.com/efe981d95d663e5afe073648c77010b2cdd739229bca2cef435d30967bc5cd33>
+        a                            <http://ontoloy/Person> ;
+        <http://ontoloy/birthDate>   "21/03/1960" ;
+        <http://ontoloy/birthPlace>  <http://www.example.com/fb8dd88813111acdbcc057de1dd8a3154428181419285f484018624df090b95e> ;
+        <http://ontoloy/email>       "ayrton@senna.com.br" ;
+        <http://ontoloy/name>        "Ayrton Senna" ;
+        <http://ontoloy/occupation>  "Driver" .
+
+<http://www.example.com/d486f2ab864536cff91f4a9d1f4635700db34fdd9abf174869e883d6a9f2687d>
+        a                            <http://ontoloy/Person> ;
+        <http://ontoloy/birthDate>   "15/02/1907" ;
+        <http://ontoloy/birthPlace>  <http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f> ;
+        <http://ontoloy/email>       "oscar@niemeyer.com.br" ;
+        <http://ontoloy/name>        "Oscar Niemeyer" ;
+        <http://ontoloy/occupation>  "Architect" .
+
+<http://www.example.com/691bb0ee4ccf6675e7a37a1a2665094a7949dde4b94086c1e9db4f60f065b46f>
+        a                             <http://ontoloy/Place> ;
+        <http://ontoloy/cityName>     "Rio de Janeiro" ;
+        <http://ontoloy/countryName>  "Brazil" ;
+        <http://ontoloy/isBirthPlaceOf>
+                <http://www.example.com/d486f2ab864536cff91f4a9d1f4635700db34fdd9abf174869e883d6a9f2687d> , <http://www.example.com/3bb2ca77d7adfdfac33eb4670d4f55ce433961e895f5ffd37aa5c7577d6b2edf> ;
+        <http://ontoloy/stateName>    "Rio de Janeiro" .
