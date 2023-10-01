@@ -9,4 +9,3 @@ config:
   writeToFile: true
   singleRdfOutputFile: true
   resourcesPerFile: 100
-  processWhenStarted: true

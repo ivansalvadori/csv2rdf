@@ -52,20 +52,19 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.springframework.stereotype.Service;
 
 
-
-
-@Component
+@Service
 public class CsvReader {
 	final Logger logger = LoggerFactory.getLogger(Main.class);
 
+	//TODO: Analisar futuramente como esse link vai impactar na hora de subir o server na AWS
 	private String resourceDomain = "http://example.com";
 
 	@Value("${config.rdfFolder}")
@@ -109,15 +108,6 @@ public class CsvReader {
 	private String ontologyFile = "ontology.owl";
 	private List<CsvReaderListener> listeners = new ArrayList<>();
 
-	@Value("${config.processWhenStarted}")
-	private boolean processWhenStarted = false;
-
-	@PostConstruct
-	public void init() { 
-		if (processWhenStarted) {
-			process();
-		}
-	}
 
 	public void process() {
 		this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
