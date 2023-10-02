@@ -85,74 +85,68 @@ public class CsvReader {
 	private List<CsvReaderListener> listeners = new ArrayList<>();
 
 
-	public InputStreamResource process() {
+	public InputStreamResource process() throws IOException {
 		this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		this.resourceDomain = this.readResourceDomain();
 
 		OntModel ontologyModel = createOntologyModel();
 		this.createMapInverseProperties(ontologyModel);
 
-		try {
-			String csvFilesFolder = this.csvFilesFolder;
-			Collection<File> files = FileUtils.listFiles(new File(csvFilesFolder), null, true);
-			for (File file : files) {
-				logger.info("reading " + file.getName());
+        {
+            String csvFilesFolder = this.csvFilesFolder;
+            Collection<File> files = FileUtils.listFiles(new File(csvFilesFolder), null, true);
+            for (File file : files) {
+                logger.info("reading " + file.getName());
 
-				Reader in = new InputStreamReader(new FileInputStream(file.getPath()), this.csvEncode);
+                Reader in = new InputStreamReader(new FileInputStream(file.getPath()), this.csvEncode);
 
-				Iterable<CSVRecord> records = null;
+                Iterable<CSVRecord> records = null;
 
-				if (csvSeparator.equalsIgnoreCase("COMMA")) {
-					records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(in);
-				} else if (csvSeparator.equalsIgnoreCase("TAB")) {
-					records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
-				} else {
-					records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().withDelimiter(csvSeparator.toCharArray()[0]).parse(in);
-				}
+                if (csvSeparator.equalsIgnoreCase("COMMA")) {
+                    records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().parse(in);
+                } else if (csvSeparator.equalsIgnoreCase("TAB")) {
+                    records = CSVFormat.TDF.withFirstRecordAsHeader().parse(in);
+                } else {
+                    records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withAllowMissingColumnNames().withDelimiter(csvSeparator.toCharArray()[0]).parse(in);
+                }
 
-				for (CSVRecord record : records) {
-					JsonObject mappingContext = createContextMapping();
-					Individual resource;
-					resource = createResourceModel(mappingContext, record);
-					if (resource == null) {
-						continue;
-					}
+                for (CSVRecord record : records) {
+                    JsonObject mappingContext = createContextMapping();
+                    Individual resource;
+                    resource = createResourceModel(mappingContext, record);
+                    if (resource == null) {
+                        continue;
+                    }
 
-					removeTBox(resource);
+                    removeTBox(resource);
 
-					this.tempModel.add(resource.getModel());
-					this.individualsAddedToTempModel++;
-					this.totalProcessedRecords++;
+                    this.tempModel.add(resource.getModel());
+                    this.individualsAddedToTempModel++;
+                    this.totalProcessedRecords++;
 
-					for (CsvReaderListener listener : this.listeners) {
-						listener.justRead(resource.getModel());
-					}
-				}
-			}
+                    for (CsvReaderListener listener : this.listeners) {
+                        listener.justRead(resource.getModel());
+                    }
+                }
+            }
 
-			//TODO: tem que salvar aqui na verdade
+            // converte o model para string
+            String syntax = "NTRIPLE"; // also try "N-TRIPLE" and "TURTLE"
+            StringWriter out = new StringWriter();
+            this.tempModel.write(out, syntax);
+            String result = out.toString();
 
-			// converte o model para string
-			String syntax = "NTRIPLE"; // also try "N-TRIPLE" and "TURTLE"
-			StringWriter out = new StringWriter();
-			this.tempModel.write(out, syntax);
-			String result = out.toString();
+            byte[] bytes = result.getBytes();
+            InputStream inputStream = new ByteArrayInputStream(bytes);
+            InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
 
-			byte[] bytes = result.getBytes();
-			InputStream inputStream = new ByteArrayInputStream(bytes);
-			InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+            for (CsvReaderListener listener : this.listeners) {
+                listener.readProcessFinished();
+            }
+            logger.info("Process finished. Record(s) processed: " + totalProcessedRecords);
 
-			for (CsvReaderListener listener : this.listeners) {
-				listener.readProcessFinished();
-			}
-			logger.info("Process finished. Record(s) processed: " + totalProcessedRecords);
-
-			return inputStreamResource;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+            return inputStreamResource;
+        }
 	}
 
 	private void removeTBox(Individual resource) {

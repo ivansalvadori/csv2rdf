@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 
 @RestController
 public class ConversorController {
@@ -17,7 +19,7 @@ public class ConversorController {
         private CsvReader csvReader;
 
         @GetMapping("/converte")
-        public ResponseEntity<Resource> converteCsv() {
+        public ResponseEntity<Resource> converteCsv() throws IOException {
             InputStreamResource input = csvReader.process();
 
             return ResponseEntity.ok()
