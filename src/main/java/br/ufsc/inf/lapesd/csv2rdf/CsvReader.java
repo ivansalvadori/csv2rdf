@@ -45,6 +45,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
 
@@ -84,7 +85,7 @@ public class CsvReader {
 	private List<CsvReaderListener> listeners = new ArrayList<>();
 
 
-	public void process() {
+	public InputStreamResource process() {
 		this.tempModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		this.resourceDomain = this.readResourceDomain();
 
@@ -131,21 +132,27 @@ public class CsvReader {
 
 			//TODO: tem que salvar aqui na verdade
 
+			// converte o model para string
 			String syntax = "NTRIPLE"; // also try "N-TRIPLE" and "TURTLE"
 			StringWriter out = new StringWriter();
 			this.tempModel.write(out, syntax);
 			String result = out.toString();
 
-			System.out.println(result);
+			byte[] bytes = result.getBytes();
+			InputStream inputStream = new ByteArrayInputStream(bytes);
+			InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
 
 			for (CsvReaderListener listener : this.listeners) {
 				listener.readProcessFinished();
 			}
 			logger.info("Process finished. Record(s) processed: " + totalProcessedRecords);
 
+			return inputStreamResource;
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	private void removeTBox(Individual resource) {
