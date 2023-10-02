@@ -2,10 +2,6 @@ config:
   csvFilesFolder: "csvExample"
   csvEncode: "UTF-8"
   csvSeparator: ","
-  rdfFolder: "rdf"
   rdfFormat: "NTRIPLE"
   rdfEncode: "UTF-8"
   ontologyFormat: "N3"
-  writeToFile: true
-  singleRdfOutputFile: true
-  resourcesPerFile: 100

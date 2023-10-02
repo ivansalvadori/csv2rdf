@@ -1,16 +1,6 @@
 package br.ufsc.inf.lapesd.csv2rdf;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -27,8 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
@@ -67,9 +55,6 @@ public class CsvReader {
 	//TODO: Analisar futuramente como esse link vai impactar na hora de subir o server na AWS
 	private String resourceDomain = "http://example.com";
 
-	@Value("${config.rdfFolder}")
-	private String rdfFolder;
-
 	@Value("${config.csvFilesFolder}")
 	private String csvFilesFolder;
 
@@ -84,16 +69,6 @@ public class CsvReader {
 	
 	@Value("${config.csvEncode}")
 	private String rdfEncode = "UTF-8";
-
-	@Value("${config.singleRdfOutputFile}")
-	private boolean singleRdfOutputFile = true;
-
-	// ignored if singleRdfOutputFile true
-	@Value("${config.resourcesPerFile}")
-	private int resourcesPerFile = 0;
-
-	@Value("${config.writeToFile}")
-	private boolean writeToFile = true;
 
 	@Value("${config.ontologyFormat}")
 	String ontologyFormat = "N3";
@@ -142,21 +117,6 @@ public class CsvReader {
 						continue;
 					}
 
-					if (this.singleRdfOutputFile) {
-						if (this.individualsAddedToTempModel == this.inMemoryModelSize) {
-							writeToFile(this.tempModel, currentFileId);
-							this.tempModel.removeAll();
-							this.individualsAddedToTempModel = 0;
-						}
-					}
-
-					else if (this.resourcesPerFile == individualsAddedToTempModel) {
-						this.currentFileId = UUID.randomUUID().toString();
-						writeToFile(this.tempModel, currentFileId);
-						this.tempModel.removeAll();
-						this.individualsAddedToTempModel = 0;
-					}
-
 					removeTBox(resource);
 
 					this.tempModel.add(resource.getModel());
@@ -169,7 +129,14 @@ public class CsvReader {
 				}
 			}
 
-			writeToFile(this.tempModel, currentFileId);
+			//TODO: tem que salvar aqui na verdade
+
+			String syntax = "NTRIPLE"; // also try "N-TRIPLE" and "TURTLE"
+			StringWriter out = new StringWriter();
+			this.tempModel.write(out, syntax);
+			String result = out.toString();
+
+			System.out.println(result);
 
 			for (CsvReaderListener listener : this.listeners) {
 				listener.readProcessFinished();
@@ -285,32 +252,6 @@ public class CsvReader {
 		return individual;
 	}
 
-	private void writeToFile(Model model, String fileId) {
-		String fileName = this.rdfFolder + "/output_" + fileId + ".ntriples";
-		write(model, fileName);
-	}
-
-	private void write(Model model, String fileName) {
-		if (!this.writeToFile) {
-			return;
-		}
-
-		File directory = new File(this.rdfFolder);
-		if (!directory.exists()) {
-			directory.mkdir();
-		}
-
-		try (FileWriter fostream = new FileWriter(fileName, true);) {
-			BufferedWriter out = new BufferedWriter
-				    (new OutputStreamWriter(new FileOutputStream(fileName), this.rdfEncode));
-			
-			model.write(out, this.rdfFormat);
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	private OntModel createOntologyModel() {
 		String ontologyString = null;
 		OntModel model = ModelFactory.createOntologyModel(OntModelSpec.OWL_LITE_MEM_RULES_INF);
@@ -392,10 +333,6 @@ public class CsvReader {
 		this.listeners.add(listener);
 	}
 
-	public void setWriteToFile(boolean writeToFile) {
-		this.writeToFile = writeToFile;
-	}
-
 	public void setRdfFormat(String rdfFormat) {
 		this.rdfFormat = rdfFormat;
 	}
@@ -410,10 +347,6 @@ public class CsvReader {
 
 	public void setMappingFile(String mappingFile) {
 		this.mappingFile = mappingFile;
-	}
-
-	public void setRdfFolder(String rdfFolder) {
-		this.rdfFolder = rdfFolder;
 	}
 
 	public void setCsvFilesFolder(String csvFilesFolder) {
